@@ -1,0 +1,13 @@
+@let fees = fees$;
+
+<p>fees works or does it hahaha!</p>
+
+<ul>
+  @for (fee of fees ; track fee.id) {
+    <li>
+      {{fee.id}}
+    </li>
+  } @empty {
+    <p>No products found!</p>
+  }
+</ul>
