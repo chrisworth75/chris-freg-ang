@@ -28,4 +28,5 @@ export class FeeListComponent implements OnInit {
     this.fees$ = this.feeService.getFees();
   }
 
+  protected readonly console = console;
 }

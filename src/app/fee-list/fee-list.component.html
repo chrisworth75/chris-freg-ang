@@ -1,8 +1,12 @@
 @let fees = ( fees$ | async)!;
 
-<p>fees works or does it hahaha!</p>
+<div class="container-md border">
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Autem distinctio dolor, dolorem dolorum eaque enim error est, facilis ipsam libero maxime modi odit, optio quo repudiandae tenetur totam ullam vel.</p>
+
+</div>
 
 <ul>
+  {{ console.log(fees.length)}}
   @for (fee of fees ; track fee.id) {
     <li>
       {{fee.id}}
