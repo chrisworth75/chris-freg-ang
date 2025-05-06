@@ -1,17 +1,17 @@
 @let fees = ( fees$ | async)!;
 
-<div class="container-md border">
-  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Autem distinctio dolor, dolorem dolorum eaque enim error est, facilis ipsam libero maxime modi odit, optio quo repudiandae tenetur totam ullam vel.</p>
+<div class="container-md">
 
-</div>
 
-<ul>
+<table>
   {{ console.log(fees.length)}}
   @for (fee of fees ; track fee.id) {
-    <li>
-      {{fee.id}}
-    </li>
+    <tr>
+      <td><a routerLink="/feedetails?feeCode={{fee.id}}" routerLinkActive="active">{{fee.id}}</a></td>
+      <td>{{fee.value}}</td>
+    </tr>
   } @empty {
     <p>No products found!</p>
   }
-</ul>
+</table>
+</div>
