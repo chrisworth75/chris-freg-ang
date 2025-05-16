@@ -7,7 +7,6 @@
   {{ console.log(fees.length)}}
   @for (fee of fees ; track fee.id) {
     <tr>
-      <td><a routerLink="/upload" routerLinkActive="active">upload</a></td>
       <td><a [routerLink]="['/feedetails', 'fee0123']">fee0123</a></td>
       <td>{{fee.value}}</td>
     </tr>
