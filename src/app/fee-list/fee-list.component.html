@@ -1,9 +1,14 @@
 @let fees = ( fees$ | async)!;
 
 <div class="container-md">
-
-
-<table>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">Code</th>
+      <th scope="col">Value</th>
+    </tr>
+    </thead>
+    <tbody>
   {{ console.log(fees.length)}}
   @for (fee of fees ; track fee.id) {
     <tr>
