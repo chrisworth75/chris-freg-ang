@@ -7,13 +7,12 @@
   {{ console.log(fees.length)}}
   @for (fee of fees ; track fee.id) {
     <tr>
-      <td><a routerLink="/feedetails?feeCode={{fee.id}}" routerLinkActive="active">{{fee.id}}</a></td>
       <td><a routerLink="/upload" routerLinkActive="active">upload</a></td>
+      <td><a [routerLink]="['/feedetails', 'fee0123']">fee0123</a></td>
       <td>{{fee.value}}</td>
     </tr>
   } @empty {
     <p>No products found!</p>
   }
-  <td><a [routerLink]="['/feedetails', 'fee0123']">fee0123</a></td>
 </table>
 </div>
