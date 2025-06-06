@@ -43,7 +43,7 @@ export class FeeService {
 
   getFee(code: string): Observable<FeeDetail> {
     const options = new HttpParams().set('limit', 10);
-    const url = `${this.baseUrl}/${code}`;
+    const url = `${this.baseUrl}/fee/${code}`;
     return this.http.get<FeeDetail>(url, {
       params: options
     }).pipe(map(fee => {

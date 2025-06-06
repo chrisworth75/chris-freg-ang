@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FeeService} from '../fee.service';
-import {Observable} from 'rxjs';
+import {Observable, take} from 'rxjs';
 import {Fee} from '../fee';
 import {FeeDetail} from '../feedetail';
 
@@ -26,8 +26,12 @@ export class FeeDetailsComponent{
   }
 
   private getFee() {
-    console.log('getting fee')
+    console.log('getting fee');
     this.fee$ = this.feeService.getFee(this.feeCode);
+
+    this.fee$.pipe(take(1)).subscribe(fee => {
+      console.log('Fee value:', fee);
+    });
   }
 
   protected readonly console = console;
