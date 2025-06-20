@@ -1,5 +1,5 @@
 export interface Fee {
   id: string;
-  category: string;
+  status: string;
   value: number;
 }

@@ -1,34 +1,51 @@
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import {Observable} from 'rxjs';
 import {Fee} from '../fee';
 import {FeeService} from '../fee.service';
 import { RouterLink} from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-fee-details-list',
-  providers: [FeeService],
-  imports: [AsyncPipe,
-  RouterLink],
+  selector: 'app-fee-list',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './fee-list.component.html',
-  styleUrl: './fee-list.component.css'
+  styleUrls: ['./fee-list.component.css']
 })
 export class FeeListComponent implements OnInit {
-  fees$: Observable<Fee[]> | undefined;
+  allFees: Fee[] = [];
+  filteredFees: Fee[] = [];
+  activeTab: 'draft' | 'approved' | 'live' = 'draft';
 
-  constructor(private feeService: FeeService) {
-  }
-
+  constructor(private feeService: FeeService,
+              private cdr: ChangeDetectorRef,) {}
 
   ngOnInit(): void {
-    console.log('ng init called');
-    this.getFees();
+    this.feeService.getFees().subscribe({
+      next: (fees) => {
+        console.log('Fees received from backend:', fees); // Debug log
+        this.allFees = fees;
+        this.filterFees();
+      },
+      error: (err) => console.error('Error fetching fees:', err)
+    });
   }
 
-  private getFees() {
-    console.log('getting fees')
-    this.fees$ = this.feeService.getFees();
+  filterFees(): void {
+    console.log('cw in filterFees');
+    this.filteredFees = this.allFees.filter(fee => fee.status === this.activeTab);
   }
 
-  protected readonly console = console;
+  onTabChange(status: 'draft' | 'approved' | 'live'): void {
+    console.log('cw in onTabChange', status);
+    this.activeTab = status;
+    this.filterFees();
+    this.cdr.detectChanges();
+  }
+
+  logFee(fee: any, origin: string): void {
+    console.log(origin, ' Fee:', fee);
+  }
+
 }
