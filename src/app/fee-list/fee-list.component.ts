@@ -16,6 +16,12 @@ import { CommonModule } from '@angular/common';
 export class FeeListComponent implements OnInit {
   allFees: Fee[] = [];
   filteredFees: Fee[] = [];
+  tabTypes = [
+    { id: 'draft', label: 'Draft' },
+    { id: 'approved', label: 'Approved' },
+    { id: 'live', label: 'Live' }
+  ];
+
   activeTab: 'draft' | 'approved' | 'live' = 'draft';
 
   constructor(private feeService: FeeService,
@@ -26,23 +32,26 @@ export class FeeListComponent implements OnInit {
       next: (fees) => {
         console.log('Fees received from backend:', fees); // Debug log
         this.allFees = fees;
-        this.filterFees();
       },
       error: (err) => console.error('Error fetching fees:', err)
     });
   }
 
-  filterFees(): void {
-    console.log('cw in filterFees');
-    this.filteredFees = this.allFees.filter(fee => fee.status === this.activeTab);
+
+  onTabChange(status: string): void {
+    if (status === 'draft' || status === 'approved' || status === 'live') {
+      this.activeTab = status;
+    } else {
+      console.warn('Invalid tab status:', status);
+    }
   }
 
-  onTabChange(status: 'draft' | 'approved' | 'live'): void {
-    console.log('cw in onTabChange', status);
-    this.activeTab = status;
-    this.filterFees();
-    this.cdr.detectChanges();
+
+  filterFeesByTab(tab: string): any[] {
+    return this.allFees.filter(fee => fee.status.toLowerCase() === tab);
   }
+
+
 
   logFee(fee: any, origin: string): void {
     console.log(origin, ' Fee:', fee);

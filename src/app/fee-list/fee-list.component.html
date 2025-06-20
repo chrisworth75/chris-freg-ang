@@ -1,48 +1,39 @@
 
 <ul class="nav nav-tabs" id="feeTabs" role="tablist">
-  <li class="nav-item" role="presentation">
-    <a class="nav-link" [class.active]="activeTab === 'draft'" (click)="onTabChange('draft')" id="draft-tab" data-bs-toggle="tab" href="#draft" role="tab" aria-controls="draft" aria-selected="true">Draft</a>
+  <li class="nav-item" role="presentation" *ngFor="let tab of tabTypes">
+    <a class="nav-link"
+       [class.active]="activeTab === tab.id"
+       (click)="onTabChange(tab.id)"
+       [id]="tab.id + '-tab'"
+       data-bs-toggle="tab"
+       [href]="'#' + tab.id"
+       role="tab"
+       [attr.aria-controls]="tab.id"
+       [attr.aria-selected]="activeTab === tab.id">
+      {{ tab.label }}
+    </a>
   </li>
-  <li class="nav-item" role="presentation">
-    <a class="nav-link" [class.active]="activeTab === 'approved'" (click)="onTabChange('approved')" id="approved-tab" data-bs-toggle="tab" href="#approved" role="tab" aria-controls="approved" aria-selected="false">Approved</a>
-  </li>
-  <li class="nav-item" role="presentation">
-    <a class="nav-link" [class.active]="activeTab === 'live'" (click)="onTabChange('live')" id="live-tab" data-bs-toggle="tab" href="#live" role="tab" aria-controls="live" aria-selected="false">Live</a>
-  </li>
+
 </ul>
 
 <div class="tab-content mt-3" id="feeTabsContent">
-  <!-- Draft Tab -->
-  <div class="tab-pane fade" [class.show]="activeTab === 'draft'" [class.active]="activeTab === 'draft'" id="draft" role="tabpanel" aria-labelledby="draft-tab">
-    <ng-container *ngIf="activeTab === 'draft'">
-      <div *ngFor="let fee of filteredFees">
-        {{ logFee(fee, "draft") }}
-        <div class="card mb-2">
-          <div class="card-body">
-            <h5 class="card-title">Fee ID: {{ fee.id }}</h5>
-            <p class="card-text">Value: £{{ fee.value | number:'1.2-2' }}</p>
-            <p class="card-text">Status: {{ fee.status | titlecase }}</p>
-          </div>
+  <div *ngFor="let tab of tabTypes"
+       class="tab-pane fade"
+       [id]="tab.id"
+       role="tabpanel"
+       [attr.aria-labelledby]="tab.id + '-tab'"
+       [class.show]="activeTab === tab.id"
+       [class.active]="activeTab === tab.id">
+
+    <ng-container *ngFor="let fee of filterFeesByTab(tab.id)">
+      <div class="card mb-2">
+        <div class="card-body">
+          <h5 class="card-title">Fee ID: {{ fee.id }}</h5>
+          <p class="card-text">Value: £{{ fee.value | number:'1.2-2' }}</p>
+          <p class="card-text">Status: {{ fee.status | titlecase }}</p>
         </div>
       </div>
     </ng-container>
+
   </div>
-
-  <!-- Approved Tab -->
-  <div class="tab-pane fade" [class.show]="activeTab === 'approved'" [class.active]="activeTab === 'approved'" id="approved" role="tabpanel" aria-labelledby="approved-tab">
-    <ng-container *ngIf="activeTab === 'approved'">
-      <div *ngFor="let fee of filteredFees">
-        {{ logFee(fee, "approved") }}
-        <div class="card mb-2">
-          <div class="card-body">
-            <h5 class="card-title">Fee ID: {{ fee.id }}</h5>
-            <p class="card-text">Value: £{{ fee.value | number:'1.2-2' }}</p>
-            <p class="card-text">Status: {{ fee.status | titlecase }}</p>
-          </div>
-        </div>
-      </div>
-    </ng-container>
-  </div>
-
-
 </div>
