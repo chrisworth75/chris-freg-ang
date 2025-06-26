@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule} from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {FeeService} from '../fee.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-fee-create',
@@ -10,21 +11,28 @@ import {FeeService} from '../fee.service';
   standalone: true,
   styleUrls: ['./fee-create.component.css']
 })
-export class FeeCreateComponent implements OnInit {
-  form!: FormGroup;
+export class FeeCreateComponent {
+  feeForm = new FormGroup({
+    code: new FormControl('', {
+      nonNullable: true,
+      validators: Validators.required
+    }),
+    value: new FormControl<number | undefined>(undefined, {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.min(1)
+      ]
+    }),
+    status: new FormControl('', { nonNullable: true }),
+    description: new FormControl('', { nonNullable: true })
+  });
 
-  constructor(private feeService: FeeService, private fb: FormBuilder) {}
+  constructor(private feeService: FeeService, private router: Router) {}
 
-  ngOnInit(): void {
-    this.form = this.fb.group({
-      amount: [null, [Validators.required, Validators.min(0)]]
-    });
+  createFee() {
+    console.log('create fee');
+    this.feeService.addFee(this.feeForm!.value);
   }
 
-  createFee(): void {
-  }
-
-  onSubmit() {
-
-  }
 }

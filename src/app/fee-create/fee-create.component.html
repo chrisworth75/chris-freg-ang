@@ -1,27 +1,36 @@
 <div class="mb-3">
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-    <div class="mb-3">
-      <label for="amount" class="form-label">Amount</label>
-      <input
-        type="number"
-        id="amount"
-        class="form-control"
-        formControlName="amount"
-        [class.is-invalid]="form.get('amount')?.invalid && form.get('amount')?.touched"
-        [class.is-valid]="form.get('amount')?.valid && form.get('amount')?.touched"
-        placeholder="Enter amount"
-        min="0"
-        step="0.01"
-        required
-      />
-      <div *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched" class="invalid-feedback">
-        <div *ngIf="form.get('amount')?.errors?.['required']">Amount is required.</div>
-        <div *ngIf="form.get('amount')?.errors?.['min']">Amount must be at least 0.</div>
-      </div>
+  <form [formGroup]="feeForm!" (ngSubmit)="createFee()">
+    <div>
+      <label for="code">Code</label>
+      <input id="code" formControlName="code" required />
+      @if (feeForm.controls.code.touched && feeForm.controls.code.invalid) {
+        <span class="help-text">Code is required</span>
+      }
     </div>
-
-    <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
-      Submit
-    </button>
+    <div>
+      <label for="value">Amount</label>
+      <input id="value" formControlName="value" type="number" required />
+      @if (feeForm.controls.value.touched && feeForm.controls.value.hasError('required')) {
+        <span class="help-text">Amount is required</span>
+      }
+      @if (feeForm.controls.value.touched && feeForm.controls.value.hasError('min')) {
+        <span class="help-text">Amount should be greater than 0</span>
+      }
+      @if (feeForm.controls.value.touched && feeForm.controls.value.hasError('valueMaximum')) {
+        <span class="help-text">Amount must be smaller or equal to 1000</span>
+      }
+    </div>
+    <div>
+      <label for="status">Status</label>
+      <select id="status" formControlName="status">
+        <option>Select a status</option>
+        <option value="draft">Draft</option>
+        <option value="approved">Approved</option>
+        <option value="live">Live</option>
+      </select>
+    </div>
+    <div>
+      <button type="submit" [disabled]="feeForm.invalid">Create</button>
+    </div>
   </form>
 </div>

@@ -54,4 +54,18 @@ export class FeeService {
   }
 
 
+  addFee(newFee: Partial<FeeDetail>): Observable<FeeDetail> {
+    const url = `${this.baseUrl}/fee/`;
+    return this.http.post<FeeDetail>(url, newFee).pipe(
+      map(fee => {
+        this.fees.push(fee);
+        return fee;
+      })
+    );
+  }
+
+
+
+
+
 }

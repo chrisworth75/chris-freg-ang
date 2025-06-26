@@ -1,5 +1,5 @@
 export interface Fee {
-  id: string;
+  code: string;
   status: string;
   value: number;
 }

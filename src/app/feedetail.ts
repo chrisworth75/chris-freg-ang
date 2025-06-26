@@ -1,5 +1,6 @@
 export interface FeeDetail {
-  id: string;
+  code: string;
   value: number;
+  status: string;
   description: string;
 }
