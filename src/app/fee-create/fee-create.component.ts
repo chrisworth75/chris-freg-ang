@@ -32,7 +32,9 @@ export class FeeCreateComponent {
 
   createFee() {
     console.log('create fee');
-    this.feeService.addFee(this.feeForm!.value);
+    this.feeService.addFee(this.feeForm!.value).subscribe({
+      next: fee => console.log('Fee posted:', fee),
+      error: err => console.error('Error posting fee:', err)
+    });
   }
-
 }
