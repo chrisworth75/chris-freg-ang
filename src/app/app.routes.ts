@@ -1,13 +1,12 @@
 import { Routes } from '@angular/router';
 import {FeeListComponent} from './fee-list/fee-list.component';
 import {FeeDetailsComponent} from './fee-details/fee-details.component';
-import {UploadComponent} from './upload/upload.component';
-import {NotFoundComponent} from './not-found/not-found.component';
+import {FeeCreateComponent} from './fee-create/fee-create.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'fees', pathMatch: 'full' },
   { path: 'fees', component: FeeListComponent},
   { path: 'feedetails/:feeCode', component: FeeDetailsComponent},
-  { path: 'create', component: CreateComponent}
+  { path: 'create', component: FeeCreateComponent}
 ];
 
