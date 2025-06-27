@@ -36,5 +36,6 @@ export class FeeCreateComponent {
       next: fee => console.log('Fee posted:', fee),
       error: err => console.error('Error posting fee:', err)
     });
+    this.router.navigate(['/fees'])
   }
 }
