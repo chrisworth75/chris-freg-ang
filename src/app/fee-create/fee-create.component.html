@@ -1,36 +1,82 @@
-<div class="mb-3">
-  <form [formGroup]="feeForm!" (ngSubmit)="createFee()">
-    <div>
-      <label for="code">Code</label>
-      <input id="code" formControlName="code" required />
-      @if (feeForm.controls.code.touched && feeForm.controls.code.invalid) {
-        <span class="help-text">Code is required</span>
-      }
+<div class="mb-3 container">
+  <form [formGroup]="feeForm" (ngSubmit)="createFee()" novalidate>
+    <!-- Code field -->
+    <div class="mb-3">
+      <label for="code" class="form-label">Code</label>
+      <input
+        id="code"
+        type="text"
+        class="form-control"
+        formControlName="code"
+        [class.is-invalid]="
+          (feeForm.controls.code.touched || feeForm.controls.code.dirty) &&
+          feeForm.controls.code.invalid
+        "
+        required
+      />
+      <div class="invalid-feedback" *ngIf="feeForm.controls.code.hasError('required') && (feeForm.controls.code.touched || feeForm.controls.code.dirty)">
+        Code is required.
+      </div>
+      <div class="invalid-feedback" *ngIf="feeForm.controls.code.hasError('duplicate')">
+        This fee code already exists. Please choose another.
+      </div>
     </div>
-    <div>
-      <label for="value">Amount</label>
-      <input id="value" formControlName="value" type="number" required />
-      @if (feeForm.controls.value.touched && feeForm.controls.value.hasError('required')) {
-        <span class="help-text">Amount is required</span>
-      }
-      @if (feeForm.controls.value.touched && feeForm.controls.value.hasError('min')) {
-        <span class="help-text">Amount should be greater than 0</span>
-      }
-      @if (feeForm.controls.value.touched && feeForm.controls.value.hasError('valueMaximum')) {
-        <span class="help-text">Amount must be smaller or equal to 1000</span>
-      }
+
+    <!-- Value field -->
+    <div class="mb-3">
+      <label for="value" class="form-label">Amount</label>
+      <input
+        id="value"
+        type="number"
+        class="form-control"
+        formControlName="value"
+        [class.is-invalid]="
+          (feeForm.controls.value.touched || feeForm.controls.value.dirty) &&
+          feeForm.controls.value.invalid
+        "
+        required
+      />
+      <div class="invalid-feedback" *ngIf="feeForm.controls.value.hasError('required') && (feeForm.controls.value.touched || feeForm.controls.value.dirty)">
+        Amount is required.
+      </div>
+      <div class="invalid-feedback" *ngIf="feeForm.controls.value.hasError('min')">
+        Amount should be greater than 0.
+      </div>
+      <div class="invalid-feedback" *ngIf="feeForm.controls.value.hasError('valueMaximum')">
+        Amount must be smaller or equal to 1000.
+      </div>
     </div>
-    <div>
-      <label for="status">Status</label>
-      <select id="status" formControlName="status">
-        <option>Select a status</option>
+
+    <!-- Status field -->
+    <div class="mb-3">
+      <label for="status" class="form-label">Status</label>
+      <select
+        id="status"
+        class="form-select"
+        formControlName="status"
+        [class.is-invalid]="
+          (feeForm.controls.status.touched || feeForm.controls.status.dirty) &&
+          feeForm.controls.status.invalid
+        "
+        required
+      >
+        <option value="" disabled>Select a status</option>
         <option value="draft">Draft</option>
         <option value="approved">Approved</option>
         <option value="live">Live</option>
       </select>
+      <div class="invalid-feedback" *ngIf="feeForm.controls.status.hasError('required') && (feeForm.controls.status.touched || feeForm.controls.status.dirty)">
+        Status is required.
+      </div>
     </div>
-    <div>
-      <button type="submit" [disabled]="feeForm.invalid">Create</button>
-    </div>
+
+    <!-- Submit button -->
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [disabled]="feeForm.invalid"
+    >
+      Create
+    </button>
   </form>
 </div>
