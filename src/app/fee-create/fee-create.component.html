@@ -1,4 +1,19 @@
-<div class="mb-3 container">
+<div class="container mt-4">
+  <!-- Success Alert -->
+  <div
+    *ngIf="showSuccess"
+    class="alert alert-success alert-dismissible fade show"
+    role="alert"
+  >
+    {{ successMessage }}
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="showSuccess = false"
+    ></button>
+  </div>
+
   <form [formGroup]="feeForm" (ngSubmit)="createFee()" novalidate>
     <!-- Code field -->
     <div class="mb-3">
@@ -8,13 +23,10 @@
         type="text"
         class="form-control"
         formControlName="code"
-        [class.is-invalid]="
-          (feeForm.controls.code.touched || feeForm.controls.code.dirty) &&
-          feeForm.controls.code.invalid
-        "
+        [class.is-invalid]="feeForm.controls.code.touched && feeForm.controls.code.invalid"
         required
       />
-      <div class="invalid-feedback" *ngIf="feeForm.controls.code.hasError('required') && (feeForm.controls.code.touched || feeForm.controls.code.dirty)">
+      <div class="invalid-feedback" *ngIf="feeForm.controls.code.hasError('required')">
         Code is required.
       </div>
       <div class="invalid-feedback" *ngIf="feeForm.controls.code.hasError('duplicate')">
@@ -30,13 +42,10 @@
         type="number"
         class="form-control"
         formControlName="value"
-        [class.is-invalid]="
-          (feeForm.controls.value.touched || feeForm.controls.value.dirty) &&
-          feeForm.controls.value.invalid
-        "
+        [class.is-invalid]="feeForm.controls.value.touched && feeForm.controls.value.invalid"
         required
       />
-      <div class="invalid-feedback" *ngIf="feeForm.controls.value.hasError('required') && (feeForm.controls.value.touched || feeForm.controls.value.dirty)">
+      <div class="invalid-feedback" *ngIf="feeForm.controls.value.hasError('required')">
         Amount is required.
       </div>
       <div class="invalid-feedback" *ngIf="feeForm.controls.value.hasError('min')">
@@ -54,10 +63,7 @@
         id="status"
         class="form-select"
         formControlName="status"
-        [class.is-invalid]="
-          (feeForm.controls.status.touched || feeForm.controls.status.dirty) &&
-          feeForm.controls.status.invalid
-        "
+        [class.is-invalid]="feeForm.controls.status.touched && feeForm.controls.status.invalid"
         required
       >
         <option value="" disabled>Select a status</option>
@@ -65,7 +71,7 @@
         <option value="approved">Approved</option>
         <option value="live">Live</option>
       </select>
-      <div class="invalid-feedback" *ngIf="feeForm.controls.status.hasError('required') && (feeForm.controls.status.touched || feeForm.controls.status.dirty)">
+      <div class="invalid-feedback" *ngIf="feeForm.controls.status.hasError('required')">
         Status is required.
       </div>
     </div>
