@@ -1,0 +1,20 @@
+{
+  "/api/fee": {
+    "target": "http://localhost:3001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/api/fee": "/fee"
+    }
+  },
+  "/api/fees": {
+    "target": "http://localhost:3001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/api/fees": "/fees"
+    }
+  }
+}
