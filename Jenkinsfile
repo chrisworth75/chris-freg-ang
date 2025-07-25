@@ -3,6 +3,7 @@ pipeline {
 
   environment {
     CI = 'true'
+    IMAGE_NAME = "chris-freg-frontend"
   }
 
   stages {
@@ -11,19 +12,6 @@ pipeline {
         checkout scm
       }
     }
-
-    stage('Check npm') {
-                steps {
-                    script {
-                        echo "Checking environment variables and npm location"
-                    }
-                    sh '''
-                        echo "PATH: $PATH"
-                        which npm || echo "npm not found"
-                        npm -v || echo "npm is not installed or not in PATH"
-                    '''
-                }
-            }
 
     stage('Install Dependencies') {
       steps {
@@ -41,5 +29,31 @@ pipeline {
         }
       }
     }
+
+    stage('Build Docker Image') {
+      steps {
+        sh """
+          docker build -t ${IMAGE_NAME}:latest .
+        """
+      }
+    }
+
+    stage('Run Docker Container') {
+      steps {
+        sh """
+          docker stop ${IMAGE_NAME} || true
+          docker rm ${IMAGE_NAME} || true
+          docker run -d --name ${IMAGE_NAME} -p 4200:80 ${IMAGE_NAME}:latest
+        """
+      }
+    }
+  }
+
+  post {
+    always {
+      echo "Cleaning workspace"
+      cleanWs()
+    }
   }
 }
+
