@@ -38,15 +38,7 @@ pipeline {
       }
     }
 
-    stage('Run Docker Container') {
-      steps {
-        sh """
-          docker stop ${IMAGE_NAME} || true
-          docker rm ${IMAGE_NAME} || true
-          docker run -d --name ${IMAGE_NAME} -p 4200:80 ${IMAGE_NAME}:latest
-        """
-      }
-    }
+    
   }
 
   post {
