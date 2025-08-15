@@ -1,48 +1,34 @@
+
 pipeline {
   agent any
-
-  tools {
-    nodejs "node18"
-  }
 
   environment {
     CI = 'true'
     IMAGE_NAME = "chris-freg-frontend"
+    IMAGE_TAG  = "${env.BUILD_NUMBER}"
   }
 
   stages {
-    stage('Checkout') {
+    stage('Checkout') { steps { checkout scm } }
+
+    stage('Build Docker Image (multi-stage)') {
       steps {
-        checkout scm
+        sh 'docker version' // sanity check perms
+        sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest .'
       }
     }
 
-    stage('Install Dependencies') {
+    stage('(Optional) Save dist artifact from image') {
       steps {
-        sh 'npm install'
+        // pulls files out of the build stage output, if you want them archived in Jenkins
+        sh '''
+          id=$(docker create ${IMAGE_NAME}:${IMAGE_TAG})
+          docker cp $id:/usr/share/nginx/html ./dist
+          docker rm $id
+        '''
+        archiveArtifacts artifacts: 'dist/**', fingerprint: true
       }
     }
-
-    stage('Build Angular App') {
-      steps {
-        sh 'npm run build'
-      }
-      post {
-        success {
-          archiveArtifacts artifacts: 'dist/**', fingerprint: true
-        }
-      }
-    }
-
-    stage('Build Docker Image') {
-      steps {
-        sh """
-          docker build -t ${IMAGE_NAME}:latest .
-        """
-      }
-    }
-
-    
   }
 
   post {
@@ -52,4 +38,3 @@ pipeline {
     }
   }
 }
-
