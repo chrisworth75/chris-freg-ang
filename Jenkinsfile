@@ -1,9 +1,10 @@
+
 pipeline {
   agent any
 
   options {
     timestamps()
-    ansiColor('xterm')
+    // ansiColor removed from here — it's a step, not an option
   }
 
   environment {
@@ -22,22 +23,26 @@ pipeline {
 
     stage('Build Docker Image (multi-stage)') {
       steps {
-        sh '''
-          set -eux
-          docker version
-          docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest .
-        '''
+        ansiColor('xterm') {
+          sh '''
+            set -eux
+            docker version
+            docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest .
+          '''
+        }
       }
     }
 
     stage('(Optional) Save dist artifact from image') {
       steps {
-        sh '''
-          set -eux
-          id=$(docker create ${IMAGE_NAME}:${IMAGE_TAG})
-          docker cp "$id":/usr/share/nginx/html ./dist
-          docker rm "$id"
-        '''
+        ansiColor('xterm') {
+          sh '''
+            set -eux
+            id=$(docker create ${IMAGE_NAME}:${IMAGE_TAG})
+            docker cp "$id":/usr/share/nginx/html ./dist
+            docker rm "$id"
+          '''
+        }
         archiveArtifacts artifacts: 'dist/**', fingerprint: true
       }
     }
@@ -45,24 +50,26 @@ pipeline {
     stage('Deploy (local)') {
       when { branch 'main' } // remove if you want every branch to deploy
       steps {
-        sh '''
-          set -eux
-          CONTAINER=${IMAGE_NAME}
+        ansiColor('xterm') {
+          sh '''
+            set -eux
+            CONTAINER=${IMAGE_NAME}
 
-          # stop & remove any existing container
-          docker rm -f "$CONTAINER" || true
+            # stop & remove any existing container
+            docker rm -f "$CONTAINER" || true
 
-          # run new container on 8081 -> 80 (nginx)
-          docker run -d --name "$CONTAINER" \
-            -p 8081:80 \
-            --restart unless-stopped \
-            ${IMAGE_NAME}:latest
+            # run new container on 8081 -> 80 (nginx)
+            docker run -d --name "$CONTAINER" \
+              -p 8081:80 \
+              --restart unless-stopped \
+              ${IMAGE_NAME}:latest
 
-          # show status + quick smoke check
-          docker ps --filter "name=$CONTAINER"
-          sleep 2
-          (curl -fsS http://localhost:8081 >/dev/null && echo "Smoke check OK") || echo "Heads up: curl check failed (maybe curl not installed?)"
-        '''
+            # show status + quick smoke check
+            docker ps --filter "name=$CONTAINER"
+            sleep 2
+            (curl -fsS http://localhost:8081 >/dev/null && echo "Smoke check OK") || echo "Heads up: curl check failed (maybe curl not installed?)"
+          '''
+        }
       }
     }
   }
@@ -74,4 +81,3 @@ pipeline {
     }
   }
 }
-
