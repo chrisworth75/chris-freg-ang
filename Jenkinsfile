@@ -4,7 +4,6 @@ pipeline {
 
   options {
     timestamps()
-    // ansiColor removed from here — it's a step, not an option
   }
 
   environment {
@@ -23,7 +22,6 @@ pipeline {
 
     stage('Build Docker Image (multi-stage)') {
       steps {
-        ansiColor('xterm') {
           sh '''
             set -eux
             docker version
@@ -35,7 +33,6 @@ pipeline {
 
     stage('(Optional) Save dist artifact from image') {
       steps {
-        ansiColor('xterm') {
           sh '''
             set -eux
             id=$(docker create ${IMAGE_NAME}:${IMAGE_TAG})
@@ -50,7 +47,6 @@ pipeline {
     stage('Deploy (local)') {
       when { branch 'main' } // remove if you want every branch to deploy
       steps {
-        ansiColor('xterm') {
           sh '''
             set -eux
             CONTAINER=${IMAGE_NAME}
