@@ -6,7 +6,7 @@ pipeline {
     environment {
         REGISTRY = 'localhost:5000'
         IMAGE_NAME = 'chris-freg-frontend'
-        NODE_VERSION = '20'
+        NODE_VERSION = '18'
     }
 
     tools {
