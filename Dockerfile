@@ -4,7 +4,7 @@ FROM --platform=linux/arm64 node:18-alpine AS build
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 COPY . .
 RUN npm run build -- --configuration production
