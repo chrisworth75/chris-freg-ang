@@ -6,11 +6,6 @@ pipeline {
     environment {
         REGISTRY = 'localhost:5000'
         IMAGE_NAME = 'chris-freg-frontend'
-        NODE_VERSION = '18'
-    }
-
-    tools {
-        nodejs "${NODE_VERSION}"
     }
 
     stages {
@@ -123,9 +118,6 @@ pipeline {
     }
 
     post {
-        always {
-            cleanWs()
-        }
         success {
             echo 'Frontend pipeline completed successfully!'
         }
