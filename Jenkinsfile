@@ -1,76 +1,136 @@
 
+// Jenkinsfile in chris-freg repository
 pipeline {
-  agent any
+    agent any
 
-  options {
-    timestamps()
-  }
-
-  environment {
-    CI = 'true'
-    NG_CLI_ANALYTICS = 'false'
-    IMAGE_NAME = 'chris-freg-frontend'
-    IMAGE_TAG  = "${env.BUILD_NUMBER}"
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
+    environment {
+        REGISTRY = 'localhost:5000'
+        IMAGE_NAME = 'chris-freg-frontend'
+        NODE_VERSION = '20'
     }
 
-    stage('Build Docker Image (multi-stage)') {
-      steps {
-        sh '''
-          set -eux
-          docker version
-          docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest .
-        '''
-      }
+    tools {
+        nodejs "${NODE_VERSION}"
     }
 
-    stage('(Optional) Save dist artifact from image') {
-      steps {
-        sh '''
-          set -eux
-          id=$(docker create ${IMAGE_NAME}:${IMAGE_TAG})
-          docker cp "$id":/usr/share/nginx/html ./dist
-          docker rm "$id"
-        '''
-        archiveArtifacts artifacts: 'dist/**', fingerprint: true
-      }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                sh 'node --version && npm --version'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+
+        stage('Lint & Test') {
+            parallel {
+                stage('Lint') {
+                    steps {
+                        sh 'npm run lint'
+                    }
+                    post {
+                        always {
+                            publishHTML([
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: 'lint-results',
+                                reportFiles: '*.html',
+                                reportName: 'ESLint Report'
+                            ])
+                        }
+                    }
+                }
+                stage('Unit Tests') {
+                    steps {
+                        sh 'npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage'
+                    }
+                    post {
+                        always {
+                            publishTestResults testResultsPattern: 'test-results.xml'
+                            publishHTML([
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: 'coverage',
+                                reportFiles: 'index.html',
+                                reportName: 'Coverage Report'
+                            ])
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                sh 'npm run build -- --configuration production'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def image = docker.build("${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}")
+                    docker.withRegistry("http://${REGISTRY}") {
+                        image.push()
+                        image.push('latest')
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    // Stop existing container if running
+                    sh """
+                        docker stop ${IMAGE_NAME} || true
+                        docker rm ${IMAGE_NAME} || true
+                    """
+
+                    // Run new container
+                    sh """
+                        docker run -d \\
+                        --name ${IMAGE_NAME} \\
+                        --restart unless-stopped \\
+                        -p 4200:80 \\
+                        ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
+                    """
+                }
+            }
+        }
+
+        stage('Health Check') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    sleep 10 // Wait for container to start
+                    sh 'curl -f http://localhost:4200 || exit 1'
+                }
+            }
+        }
     }
 
-    stage('Deploy (local)') {
-      when { branch 'main' } // remove if you want every branch to deploy
-      steps {
-        sh '''
-          set -eux
-          CONTAINER=${IMAGE_NAME}
-
-          # stop & remove any existing container
-          docker rm -f "$CONTAINER" || true
-
-          # run new container on 8081 -> 80 (nginx)
-          docker run -d --name "$CONTAINER" \
-            -p 8081:80 \
-            --restart unless-stopped \
-            ${IMAGE_NAME}:latest
-
-          # show status + quick smoke check
-          docker ps --filter "name=$CONTAINER"
-          sleep 2
-          (curl -fsS http://localhost:8081 >/dev/null && echo "Smoke check OK") || echo "Heads up: curl check failed (maybe curl not installed?)"
-        '''
-      }
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Frontend pipeline completed successfully!'
+        }
+        failure {
+            echo 'Frontend pipeline failed!'
+        }
     }
-  }
-
-  post {
-    always {
-      echo 'Cleaning workspace'
-      cleanWs()
-    }
-  }
 }
