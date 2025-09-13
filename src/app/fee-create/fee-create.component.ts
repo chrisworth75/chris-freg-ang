@@ -21,6 +21,7 @@ export class FeeCreateComponent {
     }),
     description: new FormControl<string>('', {
       nonNullable: true,
+      validators: [Validators.required],
     }),
     status: new FormControl<string>('', {
       nonNullable: true,

@@ -56,6 +56,23 @@
       </div>
     </div>
 
+    <!-- Description field -->
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea
+        id="description"
+        class="form-control"
+        formControlName="description"
+        [class.is-invalid]="feeForm.controls.description.touched && feeForm.controls.description.invalid"
+        required
+        rows="3"
+        placeholder="Enter fee description"
+      ></textarea>
+      <div class="invalid-feedback" *ngIf="feeForm.controls.description.hasError('required')">
+        Description is required.
+      </div>
+    </div>
+
     <!-- Status field -->
     <div class="mb-3">
       <label for="status" class="form-label">Status</label>
