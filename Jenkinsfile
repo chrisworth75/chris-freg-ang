@@ -109,16 +109,35 @@ pipeline {
             }
             post {
                 always {
-                    // Archive test results and screenshots
+                    // Archive test results and reports
                     publishTestResults testResultsPattern: 'test-results/results.xml'
-                    archiveArtifacts artifacts: 'test-results/**/*', allowEmptyArchive: true
-                    archiveArtifacts artifacts: 'playwright-report/**/*', allowEmptyArchive: true
+
+                    // Archive all test artifacts including videos
+                    archiveArtifacts artifacts: 'test-results/**/*', allowEmptyArchive: true, fingerprint: true
+                    archiveArtifacts artifacts: 'playwright-report/**/*', allowEmptyArchive: true, fingerprint: true
+
+                    // Archive videos separately for easy access
+                    archiveArtifacts artifacts: 'test-results/**/videos/**/*.webm', allowEmptyArchive: true, fingerprint: true
+                    archiveArtifacts artifacts: 'test-results/**/traces/**/*.zip', allowEmptyArchive: true, fingerprint: true
+
+                    // Publish HTML reports
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright Test Report',
+                        reportTitles: 'E2E Test Results'
+                    ])
                 }
                 success {
                     echo '✅ All E2E tests passed!'
+                    echo '📊 Test report available in Jenkins artifacts'
                 }
                 failure {
-                    echo '❌ E2E tests failed - check test results and screenshots'
+                    echo '❌ E2E tests failed - check test results, screenshots, and videos'
+                    echo '🎥 Videos available in Jenkins artifacts for debugging'
                 }
             }
         }

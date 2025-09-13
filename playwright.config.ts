@@ -20,7 +20,10 @@ export default defineConfig({
     baseURL: 'http://localhost:4200',
     headless: !!process.env.CI,
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    video: {
+      mode: 'retain-on-failure',
+      size: { width: 1280, height: 720 }
+    },
     trace: 'retain-on-failure',
   },
   projects: [
