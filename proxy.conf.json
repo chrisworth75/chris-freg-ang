@@ -1,6 +1,6 @@
 {
   "/api/fee": {
-    "target": "http://localhost:3001",
+    "target": "http://localhost:5100",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
@@ -9,7 +9,7 @@
     }
   },
   "/api/fees": {
-    "target": "http://localhost:3001",
+    "target": "http://localhost:5100",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
