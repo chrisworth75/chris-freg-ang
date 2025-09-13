@@ -1,0 +1,214 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Fee Management E2E Tests', () => {
+
+  test.beforeEach(async ({ page }) => {
+    // Reset the database before each test to ensure clean state
+    await page.request.post('http://localhost:5100/reset-db');
+
+    // Navigate to the fees page
+    await page.goto('/fees');
+  });
+
+  test('should create a draft fee and verify it appears in the Draft tab', async ({ page }) => {
+    // Navigate to create page
+    await page.goto('/create');
+
+    // Fill out the form for a draft fee
+    await page.fill('#code', 'DRAFT001');
+    await page.fill('#value', '25.99');
+    await page.fill('#description', 'Test draft fee for e2e testing');
+    await page.selectOption('#status', 'draft');
+
+    // Submit the form
+    await page.click('button[type="submit"]');
+
+    // Wait for success message
+    await expect(page.locator('.alert-success')).toContainText('Fee created successfully!');
+
+    // Navigate back to fees list
+    await page.goto('/fees');
+
+    // Verify we're on the Draft tab (should be default)
+    await expect(page.locator('#draft-tab')).toHaveClass(/active/);
+
+    // Verify the fee appears in the Draft tab
+    const draftTab = page.locator('#draft');
+    await expect(draftTab.locator('.card')).toContainText('Fee ID:');
+    await expect(draftTab.locator('.card')).toContainText('£25.99');
+    await expect(draftTab.locator('.card')).toContainText('Status: Draft');
+  });
+
+  test('should create an approved fee and verify it appears in the Approved tab', async ({ page }) => {
+    // Navigate to create page
+    await page.goto('/create');
+
+    // Fill out the form for an approved fee
+    await page.fill('#code', 'APPR001');
+    await page.fill('#value', '150.50');
+    await page.fill('#description', 'Test approved fee for e2e testing');
+    await page.selectOption('#status', 'approved');
+
+    // Submit the form
+    await page.click('button[type="submit"]');
+
+    // Wait for success message
+    await expect(page.locator('.alert-success')).toContainText('Fee created successfully!');
+
+    // Navigate back to fees list
+    await page.goto('/fees');
+
+    // Click on Approved tab
+    await page.click('#approved-tab');
+
+    // Verify we're on the Approved tab
+    await expect(page.locator('#approved-tab')).toHaveClass(/active/);
+
+    // Verify the fee appears in the Approved tab
+    const approvedTab = page.locator('#approved');
+    await expect(approvedTab.locator('.card')).toContainText('Fee ID:');
+    await expect(approvedTab.locator('.card')).toContainText('£150.50');
+    await expect(approvedTab.locator('.card')).toContainText('Status: Approved');
+  });
+
+  test('should create a live fee and verify it appears in the Live tab', async ({ page }) => {
+    // Navigate to create page
+    await page.goto('/create');
+
+    // Fill out the form for a live fee
+    await page.fill('#code', 'LIVE001');
+    await page.fill('#value', '99.99');
+    await page.fill('#description', 'Test live fee for e2e testing');
+    await page.selectOption('#status', 'live');
+
+    // Submit the form
+    await page.click('button[type="submit"]');
+
+    // Wait for success message
+    await expect(page.locator('.alert-success')).toContainText('Fee created successfully!');
+
+    // Navigate back to fees list
+    await page.goto('/fees');
+
+    // Click on Live tab
+    await page.click('#live-tab');
+
+    // Verify we're on the Live tab
+    await expect(page.locator('#live-tab')).toHaveClass(/active/);
+
+    // Verify the fee appears in the Live tab
+    const liveTab = page.locator('#live');
+    await expect(liveTab.locator('.card')).toContainText('Fee ID:');
+    await expect(liveTab.locator('.card')).toContainText('£99.99');
+    await expect(liveTab.locator('.card')).toContainText('Status: Live');
+  });
+
+  test('should create fees of all categories and verify proper tab organization', async ({ page }) => {
+    const testFees = [
+      { code: 'MULTI001', value: '10.00', description: 'Multi-test draft fee', status: 'draft' },
+      { code: 'MULTI002', value: '20.00', description: 'Multi-test approved fee', status: 'approved' },
+      { code: 'MULTI003', value: '30.00', description: 'Multi-test live fee', status: 'live' }
+    ];
+
+    // Create all three fees
+    for (const fee of testFees) {
+      await page.goto('/create');
+
+      await page.fill('#code', fee.code);
+      await page.fill('#value', fee.value);
+      await page.fill('#description', fee.description);
+      await page.selectOption('#status', fee.status);
+
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.alert-success')).toContainText('Fee created successfully!');
+    }
+
+    // Navigate to fees list
+    await page.goto('/fees');
+
+    // Test Draft tab
+    await page.click('#draft-tab');
+    await expect(page.locator('#draft')).toContainText('MULTI001');
+    await expect(page.locator('#draft')).toContainText('£10.00');
+    await expect(page.locator('#draft')).not.toContainText('MULTI002');
+    await expect(page.locator('#draft')).not.toContainText('MULTI003');
+
+    // Test Approved tab
+    await page.click('#approved-tab');
+    await expect(page.locator('#approved')).toContainText('MULTI002');
+    await expect(page.locator('#approved')).toContainText('£20.00');
+    await expect(page.locator('#approved')).not.toContainText('MULTI001');
+    await expect(page.locator('#approved')).not.toContainText('MULTI003');
+
+    // Test Live tab
+    await page.click('#live-tab');
+    await expect(page.locator('#live')).toContainText('MULTI003');
+    await expect(page.locator('#live')).toContainText('£30.00');
+    await expect(page.locator('#live')).not.toContainText('MULTI001');
+    await expect(page.locator('#live')).not.toContainText('MULTI002');
+  });
+
+  test('should handle form validation errors correctly', async ({ page }) => {
+    await page.goto('/create');
+
+    // Try to submit empty form
+    await page.click('button[type="submit"]');
+
+    // Verify validation errors appear
+    await expect(page.locator('.invalid-feedback')).toContainText('Code is required');
+    await expect(page.locator('.invalid-feedback')).toContainText('Amount is required');
+    await expect(page.locator('.invalid-feedback')).toContainText('Description is required');
+    await expect(page.locator('.invalid-feedback')).toContainText('Status is required');
+
+    // Verify form is still on create page (not submitted)
+    await expect(page).toHaveURL('/create');
+  });
+
+  test('should handle duplicate fee code error', async ({ page }) => {
+    // Create first fee
+    await page.goto('/create');
+    await page.fill('#code', 'DUPLICATE001');
+    await page.fill('#value', '50.00');
+    await page.fill('#description', 'First fee');
+    await page.selectOption('#status', 'draft');
+    await page.click('button[type="submit"]');
+    await expect(page.locator('.alert-success')).toContainText('Fee created successfully!');
+
+    // Try to create duplicate
+    await page.goto('/create');
+    await page.fill('#code', 'DUPLICATE001');
+    await page.fill('#value', '60.00');
+    await page.fill('#description', 'Duplicate fee');
+    await page.selectOption('#status', 'live');
+    await page.click('button[type="submit"]');
+
+    // Verify duplicate error appears
+    await expect(page.locator('.invalid-feedback')).toContainText('This fee code already exists');
+  });
+
+  test('should verify tab switching functionality', async ({ page }) => {
+    await page.goto('/fees');
+
+    // Verify default tab is Draft
+    await expect(page.locator('#draft-tab')).toHaveClass(/active/);
+    await expect(page.locator('#draft')).toHaveClass(/show active/);
+
+    // Switch to Approved tab
+    await page.click('#approved-tab');
+    await expect(page.locator('#approved-tab')).toHaveClass(/active/);
+    await expect(page.locator('#approved')).toHaveClass(/show active/);
+    await expect(page.locator('#draft')).not.toHaveClass(/active/);
+
+    // Switch to Live tab
+    await page.click('#live-tab');
+    await expect(page.locator('#live-tab')).toHaveClass(/active/);
+    await expect(page.locator('#live')).toHaveClass(/show active/);
+    await expect(page.locator('#approved')).not.toHaveClass(/active/);
+
+    // Switch back to Draft tab
+    await page.click('#draft-tab');
+    await expect(page.locator('#draft-tab')).toHaveClass(/active/);
+    await expect(page.locator('#draft')).toHaveClass(/show active/);
+    await expect(page.locator('#live')).not.toHaveClass(/active/);
+  });
+});
