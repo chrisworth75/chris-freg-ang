@@ -110,12 +110,20 @@ pipeline {
                         curl -f http://localhost:4200/ || (echo "❌ Frontend not accessible" && exit 1)
                         curl -f http://localhost:5100/health || (echo "❌ API not accessible" && exit 1)
 
+                        # Get host IP for Docker Desktop compatibility
+                        HOST_IP=\$(docker run --rm --net host alpine ip route | awk 'NR==1 {print \$3}' | head -1)
+                        if [ -z "\$HOST_IP" ]; then
+                            HOST_IP="host.docker.internal"
+                        fi
+
+                        echo "🌐 Using host IP: \$HOST_IP"
+
                         docker run --rm \\
-                            --network host \\
                             -v "$(pwd):/workspace" \\
                             --workdir /workspace \\
                             -e CI=true \\
                             -e PLAYWRIGHT_BROWSERS_PATH=0 \\
+                            -e PLAYWRIGHT_BASE_URL="http://\$HOST_IP:4200" \\
                             mcr.microsoft.com/playwright:v1.40.0-jammy sh -c "
                                 echo '📦 Installing dependencies...'
                                 npm ci
@@ -124,8 +132,8 @@ pipeline {
                                 echo '📁 Creating output directories...'
                                 mkdir -p test-results playwright-report
                                 echo '🔍 Final service check from inside container...'
-                                curl -f http://localhost:4200/ || (echo 'Frontend not accessible from container' && exit 1)
-                                curl -f http://localhost:5100/health || (echo 'API not accessible from container' && exit 1)
+                                curl -f http://\$HOST_IP:4200/ || (echo 'Frontend not accessible from container' && exit 1)
+                                curl -f http://\$HOST_IP:5100/health || (echo 'API not accessible from container' && exit 1)
                                 echo '🧪 Running Playwright tests...'
                                 npx playwright test --config=playwright.config.ts --reporter=list,junit:test-results/results.xml,html:playwright-report/
                                 echo '✅ Tests completed successfully'
