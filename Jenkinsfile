@@ -91,20 +91,35 @@ pipeline {
                             fi
                         done
 
+                        # Set up Node.js environment explicitly
+                        export PATH="/Users/chris/.nvm/versions/node/v18.17.1/bin:$PATH"
+                        echo "📍 Node.js version: $(node --version)"
+                        echo "📍 NPM version: $(npm --version)"
+
                         echo "📦 Installing npm dependencies..."
-                        npm ci --production=false
+                        npm ci --production=false --no-optional || { echo "npm ci failed"; exit 1; }
 
                         echo "🎭 Installing Playwright browsers..."
-                        npx playwright install chromium --with-deps
+                        npx playwright install chromium --with-deps || { echo "Playwright install failed"; exit 1; }
 
                         echo "📁 Creating output directories..."
                         mkdir -p test-results playwright-report
 
                         echo "🧪 Running Playwright tests..."
                         export CI=true
-                        npx playwright test --config=playwright.config.ts --reporter=line,junit:test-results/results.xml,html:playwright-report/
+                        export NODE_ENV=test
+                        timeout 300 npx playwright test --config=playwright.config.ts --reporter=line,junit:test-results/results.xml,html:playwright-report/ || {
+                            echo "Tests failed or timed out"
+                            echo "Checking what was created:"
+                            ls -la test-results/ || echo "No test-results directory"
+                            ls -la playwright-report/ || echo "No playwright-report directory"
+                            exit 1
+                        }
 
                         echo "✅ E2E tests completed successfully"
+                        echo "📊 Test results summary:"
+                        ls -la test-results/ | head -10
+                        ls -la playwright-report/ | head -5
                     '''
                 }
             }
