@@ -4,15 +4,23 @@ test.describe('Fee Management E2E Tests', () => {
 
   test.beforeEach(async ({ page }) => {
     // Reset the database before each test to ensure clean state
-    await page.request.post('http://localhost:5100/reset-db');
+    try {
+      const response = await page.request.post('http://localhost:5100/reset-db');
+      console.log('Database reset response:', response.status());
+    } catch (error) {
+      console.error('Failed to reset database:', error);
+      throw error;
+    }
 
-    // Navigate to the fees page
+    // Navigate to the fees page and wait for it to load
     await page.goto('/fees');
+    await page.waitForLoadState('networkidle');
   });
 
   test('should create a draft fee and verify it appears in the Draft tab', async ({ page }) => {
     // Navigate to create page
     await page.goto('/create');
+    await page.waitForLoadState('networkidle');
 
     // Fill out the form for a draft fee
     await page.fill('#code', 'DRAFT001');

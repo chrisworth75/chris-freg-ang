@@ -97,10 +97,12 @@ pipeline {
                             --network host \\
                             -v "$(pwd):/workspace" \\
                             --workdir /workspace \\
+                            -e CI=true \\
                             mcr.microsoft.com/playwright:v1.40.0-jammy sh -c "
                                 npm ci
-                                npx playwright install
-                                npx playwright test --reporter=junit
+                                npx playwright install --with-deps chromium
+                                mkdir -p test-results
+                                npx playwright test --reporter=html,junit --output-dir=test-results
                             "
                     '''
                 }
