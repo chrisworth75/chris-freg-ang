@@ -101,8 +101,8 @@ pipeline {
                             mcr.microsoft.com/playwright:v1.40.0-jammy sh -c "
                                 npm ci
                                 npx playwright install --with-deps chromium
-                                mkdir -p test-results
-                                npx playwright test
+                                mkdir -p test-results playwright-report
+                                node_modules/.bin/playwright test --config=playwright.config.ts
                             "
                     '''
                 }
