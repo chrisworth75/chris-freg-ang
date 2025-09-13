@@ -63,103 +63,47 @@ pipeline {
             }
         }
 
-        stage('E2E Tests') {
+        stage('Debug Jenkins Environment') {
             when {
                 branch 'main'
             }
             steps {
                 script {
                     sh '''
-                        echo "🧪 Running E2E tests with Playwright (direct execution)..."
-
-                        # Wait for both frontend and API to be ready
-                        echo "⏳ Waiting for services to be ready..."
-                        for i in {1..30}; do
-                            frontend_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4200 || echo "000")
-                            api_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5100/health || echo "000")
-
-                            echo "🔍 Attempt $i/30: Frontend=$frontend_status, API=$api_status"
-
-                            if [ "$frontend_status" = "200" ] && [ "$api_status" = "200" ]; then
-                                echo "✅ Both services are ready"
-                                break
-                            elif [ $i -eq 30 ]; then
-                                echo "❌ Services failed to become ready after 150 seconds"
-                                exit 1
-                            else
-                                sleep 5
-                            fi
-                        done
-
-                        # Set up Node.js environment explicitly
-                        export PATH="/Users/chris/.nvm/versions/node/v18.17.1/bin:$PATH"
-                        echo "📍 Node.js version: $(node --version)"
-                        echo "📍 NPM version: $(npm --version)"
-
-                        echo "📦 Installing npm dependencies..."
-                        npm ci --production=false --no-optional || { echo "npm ci failed"; exit 1; }
-
-                        echo "🎭 Installing Playwright browsers..."
-                        npx playwright install chromium --with-deps || { echo "Playwright install failed"; exit 1; }
-
-                        echo "📁 Creating output directories..."
-                        mkdir -p test-results playwright-report
-
-                        echo "🧪 Running Playwright tests..."
-                        export CI=true
-                        export NODE_ENV=test
-                        timeout 300 npx playwright test --config=playwright.config.ts --reporter=line,junit:test-results/results.xml,html:playwright-report/ || {
-                            echo "Tests failed or timed out"
-                            echo "Checking what was created:"
-                            ls -la test-results/ || echo "No test-results directory"
-                            ls -la playwright-report/ || echo "No playwright-report directory"
-                            exit 1
-                        }
-
-                        echo "✅ E2E tests completed successfully"
-                        echo "📊 Test results summary:"
-                        ls -la test-results/ | head -10
-                        ls -la playwright-report/ | head -5
+                        echo "🔍 === JENKINS ENVIRONMENT DEBUG ==="
+                        echo "📍 Current user: $(whoami)"
+                        echo "📍 Current directory: $(pwd)"
+                        echo "📍 PATH: $PATH"
+                        echo ""
+                        echo "📍 Looking for Node.js installations:"
+                        which node || echo "❌ node not found in PATH"
+                        which npm || echo "❌ npm not found in PATH"
+                        which npx || echo "❌ npx not found in PATH"
+                        echo ""
+                        echo "📍 Checking common Node.js locations:"
+                        ls -la /usr/local/bin/ | grep node || echo "No node in /usr/local/bin/"
+                        ls -la /opt/homebrew/bin/ | grep node || echo "No node in /opt/homebrew/bin/"
+                        ls -la /Users/chris/.nvm/versions/node/ || echo "No nvm directory"
+                        echo ""
+                        echo "📍 Service status check:"
+                        frontend_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4200 || echo "000")
+                        api_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5100/health || echo "000")
+                        echo "Frontend (4200): $frontend_status"
+                        echo "API (5100): $api_status"
+                        echo ""
+                        echo "📍 Directory contents:"
+                        ls -la
+                        echo ""
+                        echo "📍 Package.json check:"
+                        cat package.json | head -20 || echo "No package.json"
+                        echo ""
+                        echo "🎯 This is what Jenkins actually sees!"
                     '''
                 }
             }
             post {
                 always {
-                    // Archive test results and reports
-                    script {
-                        try {
-                            publishTestResults testResultsPattern: 'test-results/results.xml'
-                        } catch (Exception e) {
-                            echo "No JUnit test results found: ${e.getMessage()}"
-                        }
-                    }
-
-                    // Archive all test artifacts including videos
-                    archiveArtifacts artifacts: 'test-results/**/*', allowEmptyArchive: true, fingerprint: true
-                    archiveArtifacts artifacts: 'playwright-report/**/*', allowEmptyArchive: true, fingerprint: true
-
-                    // Publish HTML reports
-                    script {
-                        try {
-                            publishHTML([
-                                allowMissing: true,
-                                alwaysLinkToLastBuild: true,
-                                keepAll: true,
-                                reportDir: 'playwright-report',
-                                reportFiles: 'index.html',
-                                reportName: 'Playwright Test Report',
-                                reportTitles: 'E2E Test Results'
-                            ])
-                        } catch (Exception e) {
-                            echo "No HTML report found: ${e.getMessage()}"
-                        }
-                    }
-                }
-                success {
-                    echo '✅ All E2E tests passed!'
-                }
-                failure {
-                    echo '❌ E2E tests failed - check test results and reports'
+                    echo '🔍 Debug stage completed - check console output above for Jenkins environment details'
                 }
             }
         }
