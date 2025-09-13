@@ -63,47 +63,57 @@ pipeline {
             }
         }
 
-        stage('Debug Jenkins Environment') {
+        stage('E2E Tests') {
             when {
                 branch 'main'
             }
             steps {
                 script {
+                    // Wait for services to be ready
                     sh '''
-                        echo "🔍 === JENKINS ENVIRONMENT DEBUG ==="
-                        echo "📍 Current user: $(whoami)"
-                        echo "📍 Current directory: $(pwd)"
-                        echo "📍 PATH: $PATH"
-                        echo ""
-                        echo "📍 Looking for Node.js installations:"
-                        which node || echo "❌ node not found in PATH"
-                        which npm || echo "❌ npm not found in PATH"
-                        which npx || echo "❌ npx not found in PATH"
-                        echo ""
-                        echo "📍 Checking common Node.js locations:"
-                        ls -la /usr/local/bin/ | grep node || echo "No node in /usr/local/bin/"
-                        ls -la /opt/homebrew/bin/ | grep node || echo "No node in /opt/homebrew/bin/"
-                        ls -la /Users/chris/.nvm/versions/node/ || echo "No nvm directory"
-                        echo ""
-                        echo "📍 Service status check:"
-                        frontend_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4200 || echo "000")
-                        api_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5100/health || echo "000")
-                        echo "Frontend (4200): $frontend_status"
-                        echo "API (5100): $api_status"
-                        echo ""
-                        echo "📍 Directory contents:"
-                        ls -la
-                        echo ""
-                        echo "📍 Package.json check:"
-                        cat package.json | head -20 || echo "No package.json"
-                        echo ""
-                        echo "🎯 This is what Jenkins actually sees!"
+                        echo "🔄 Waiting for services to be ready..."
+                        timeout=60
+                        while [ $timeout -gt 0 ]; do
+                            frontend_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4200 || echo "000")
+                            api_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5100/health || echo "000")
+
+                            if [ "$frontend_status" = "200" ] && [ "$api_status" = "200" ]; then
+                                echo "✅ Both services are ready"
+                                break
+                            fi
+
+                            echo "⏳ Frontend: $frontend_status, API: $api_status - waiting..."
+                            sleep 2
+                            timeout=$((timeout-2))
+                        done
+
+                        if [ $timeout -le 0 ]; then
+                            echo "❌ Services failed to start within timeout"
+                            exit 1
+                        fi
+                    '''
+
+                    // Run E2E tests with Node.js from nvm
+                    sh '''
+                        export PATH="/Users/chris/.nvm/versions/node/v18.17.1/bin:$PATH"
+                        echo "📍 Node.js version: $(node --version)"
+                        echo "📍 NPM version: $(npm --version)"
+                        echo "🧪 Installing Playwright browsers..."
+                        npx playwright install chromium
+                        echo "🚀 Running E2E tests..."
+                        CI=true npx playwright test --reporter=line
                     '''
                 }
             }
             post {
                 always {
-                    echo '🔍 Debug stage completed - check console output above for Jenkins environment details'
+                    // Archive test results and videos
+                    publishTestResults testResultsPattern: 'test-results/results.xml'
+                    archiveArtifacts artifacts: 'test-results/**/*', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'playwright-report/**/*', allowEmptyArchive: true
+                }
+                failure {
+                    echo '❌ E2E tests failed - check artifacts for details'
                 }
             }
         }
