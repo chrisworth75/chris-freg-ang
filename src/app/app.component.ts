@@ -10,5 +10,5 @@ import {HeaderComponent} from './header/header.component';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'chris-freg';
+  title = 'chris-freg-ang';
 }

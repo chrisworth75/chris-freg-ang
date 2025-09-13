@@ -1,5 +1,5 @@
 
-# Dockerfile for chris-freg (Angular) - ARM64 optimized
+# Dockerfile for chris-freg-ang (Angular) - ARM64 optimized
 FROM --platform=linux/arm64 node:18-alpine AS build
 
 WORKDIR /app
