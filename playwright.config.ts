@@ -17,7 +17,7 @@ export default defineConfig({
     ['list']
   ],
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:4200',
+    baseURL: 'http://localhost:4200',
     headless: !!process.env.CI,
     screenshot: 'only-on-failure',
     video: {
