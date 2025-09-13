@@ -1,6 +1,24 @@
-# ChrisFreg
+# chris-freg Projects
 
-This project was generated  by keith using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.4.
+This is part of a 3-project system designed for local development and deployment on an M1 Mac using Jenkins and Docker Desktop:
+
+- **chris-freg** - Frontend application
+- **chris-freg-api** - REST API backend
+- **chris-freg-db** - Database initialization and schema
+
+All projects are configured to be built and deployed automatically by a local Jenkins installation that polls GitHub repositories, builds Docker images, and deploys containers with full CI/CD pipeline integration.
+
+## chris-freg
+
+Angular frontend application for the fees management system.
+
+### Features
+- Angular web interface for fee management
+- Integration with chris-freg-api backend
+- Docker containerization with nginx
+- Jenkins CI/CD pipeline integration
+
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.4.
 
 ## Development server
 
