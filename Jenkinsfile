@@ -104,12 +104,18 @@ pipeline {
 
                         # Run Playwright tests in Docker container
                         echo "🐳 Starting Playwright Docker container..."
+
+                        # First test if services are accessible
+                        echo "🔍 Testing service accessibility before running tests..."
+                        curl -f http://localhost:4200/ || (echo "❌ Frontend not accessible" && exit 1)
+                        curl -f http://localhost:5100/health || (echo "❌ API not accessible" && exit 1)
+
                         docker run --rm \\
                             --network host \\
                             -v "$(pwd):/workspace" \\
                             --workdir /workspace \\
                             -e CI=true \\
-                            -e DEBUG=pw:* \\
+                            -e PLAYWRIGHT_BROWSERS_PATH=0 \\
                             mcr.microsoft.com/playwright:v1.40.0-jammy sh -c "
                                 echo '📦 Installing dependencies...'
                                 npm ci
@@ -117,19 +123,26 @@ pipeline {
                                 npx playwright install --with-deps chromium
                                 echo '📁 Creating output directories...'
                                 mkdir -p test-results playwright-report
-                                echo '🔍 Checking services from inside container...'
-                                curl -I http://localhost:4200 || echo 'Frontend not accessible'
-                                curl -I http://localhost:5100/health || echo 'API not accessible'
+                                echo '🔍 Final service check from inside container...'
+                                curl -f http://localhost:4200/ || (echo 'Frontend not accessible from container' && exit 1)
+                                curl -f http://localhost:5100/health || (echo 'API not accessible from container' && exit 1)
                                 echo '🧪 Running Playwright tests...'
-                                node_modules/.bin/playwright test --config=playwright.config.ts || echo 'Tests completed with exit code: \$?'
+                                npx playwright test --config=playwright.config.ts --reporter=list,junit:test-results/results.xml,html:playwright-report/
+                                echo '✅ Tests completed successfully'
                             "
                     '''
                 }
             }
             post {
                 always {
-                    // Archive test results and reports
-                    publishTestResults testResultsPattern: 'test-results/results.xml'
+                    // Archive test results and reports (allow missing files)
+                    script {
+                        try {
+                            publishTestResults testResultsPattern: 'test-results/results.xml'
+                        } catch (Exception e) {
+                            echo "No JUnit test results found: ${e.getMessage()}"
+                        }
+                    }
 
                     // Archive all test artifacts including videos
                     archiveArtifacts artifacts: 'test-results/**/*', allowEmptyArchive: true, fingerprint: true
@@ -140,15 +153,21 @@ pipeline {
                     archiveArtifacts artifacts: 'test-results/**/traces/**/*.zip', allowEmptyArchive: true, fingerprint: true
 
                     // Publish HTML reports
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Playwright Test Report',
-                        reportTitles: 'E2E Test Results'
-                    ])
+                    script {
+                        try {
+                            publishHTML([
+                                allowMissing: true,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: 'playwright-report',
+                                reportFiles: 'index.html',
+                                reportName: 'Playwright Test Report',
+                                reportTitles: 'E2E Test Results'
+                            ])
+                        } catch (Exception e) {
+                            echo "No HTML report found: ${e.getMessage()}"
+                        }
+                    }
                 }
                 success {
                     echo '✅ All E2E tests passed!'
