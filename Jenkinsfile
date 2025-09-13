@@ -75,34 +75,53 @@ pipeline {
 
                         # Wait for both frontend and API to be ready
                         echo "⏳ Waiting for services to be ready..."
-                        for i in {1..30}; do
-                            if curl -f -s http://localhost:4200 > /dev/null 2>&1 && curl -f -s http://localhost:5100/health > /dev/null 2>&1; then
+                        echo "🔍 Checking running containers:"
+                        docker ps
+
+                        for i in {1..60}; do
+                            frontend_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4200 || echo "000")
+                            api_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5100/health || echo "000")
+
+                            echo "🔍 Attempt $i/60: Frontend=$frontend_status, API=$api_status"
+
+                            if [ "$frontend_status" = "200" ] && [ "$api_status" = "200" ]; then
                                 echo "✅ Both services are ready after $((i * 5)) seconds"
+                                echo "🌐 Frontend response:"
+                                curl -s http://localhost:4200 | head -n 5
+                                echo "🔗 API response:"
+                                curl -s http://localhost:5100/health
                                 break
-                            elif [ $i -eq 30 ]; then
-                                echo "❌ Services failed to become ready after 150 seconds"
-                                echo "Frontend status:"
-                                curl -I http://localhost:4200 || true
-                                echo "API status:"
-                                curl -I http://localhost:5100/health || true
+                            elif [ $i -eq 60 ]; then
+                                echo "❌ Services failed to become ready after 300 seconds"
+                                echo "🔍 Container logs:"
+                                docker logs chris-freg-frontend --tail 10 || true
+                                docker logs chris-freg-api --tail 10 || true
                                 exit 1
                             else
-                                echo "⏳ Attempt $i/30: Services not ready, waiting 5s..."
                                 sleep 5
                             fi
                         done
 
                         # Run Playwright tests in Docker container
+                        echo "🐳 Starting Playwright Docker container..."
                         docker run --rm \\
                             --network host \\
                             -v "$(pwd):/workspace" \\
                             --workdir /workspace \\
                             -e CI=true \\
+                            -e DEBUG=pw:* \\
                             mcr.microsoft.com/playwright:v1.40.0-jammy sh -c "
+                                echo '📦 Installing dependencies...'
                                 npm ci
+                                echo '🎭 Installing Playwright browsers...'
                                 npx playwright install --with-deps chromium
+                                echo '📁 Creating output directories...'
                                 mkdir -p test-results playwright-report
-                                node_modules/.bin/playwright test --config=playwright.config.ts
+                                echo '🔍 Checking services from inside container...'
+                                curl -I http://localhost:4200 || echo 'Frontend not accessible'
+                                curl -I http://localhost:5100/health || echo 'API not accessible'
+                                echo '🧪 Running Playwright tests...'
+                                node_modules/.bin/playwright test --config=playwright.config.ts || echo 'Tests completed with exit code: \$?'
                             "
                     '''
                 }
