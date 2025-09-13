@@ -42,8 +42,10 @@ export class FeeCreateComponent {
 
     const formValue = this.feeForm.value;
     const cleanedFeeData = {
-      ...formValue,
-      value: formValue.value ?? undefined,
+      code: formValue.code,
+      value: Number(formValue.value),
+      description: formValue.description,
+      status: formValue.status,
     };
 
     this.feeService.createFee(cleanedFeeData).subscribe({
