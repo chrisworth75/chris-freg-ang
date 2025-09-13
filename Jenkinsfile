@@ -102,7 +102,7 @@ pipeline {
                                 npm ci
                                 npx playwright install --with-deps chromium
                                 mkdir -p test-results
-                                npx playwright test --reporter=html,junit --output-dir=test-results
+                                npx playwright test
                             "
                     '''
                 }
