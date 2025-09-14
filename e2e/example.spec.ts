@@ -25,10 +25,17 @@ test('Create fee with code fee002 (approved)', async ({ page }) => {
   await page.goto('http://localhost:4200/fees');
   await page.getByRole('link', { name: 'Create Fee' }).click();
 
-  await page.getByRole('textbox', { name: 'Code' }).fill('fee002');
-  await page.getByRole('spinbutton', { name: 'Amount' }).fill('200');
-  await page.getByRole('textbox', { name: 'Description' }).fill('Test fee 002');
-  await page.getByRole('combobox', { name: 'Status' }).selectOption('approved');
+  // Fill form fields using ID selectors and trigger validation
+  await page.fill('#code', 'fee002');
+  await page.fill('#value', '200');
+  await page.fill('#description', 'Test fee 002');
+  await page.selectOption('#status', 'approved');
+
+  // Wait for form to become valid and button to be enabled
+  await page.waitForFunction(() => {
+    const button = document.querySelector('button[type="submit"]') as HTMLButtonElement;
+    return button && !button.disabled;
+  });
 
   await page.getByRole('button', { name: 'Create' }).click();
 
@@ -39,10 +46,17 @@ test('Create fee with code fee003 (live)', async ({ page }) => {
   await page.goto('http://localhost:4200/fees');
   await page.getByRole('link', { name: 'Create Fee' }).click();
 
-  await page.getByRole('textbox', { name: 'Code' }).fill('fee003');
-  await page.getByRole('spinbutton', { name: 'Amount' }).fill('300');
-  await page.getByRole('textbox', { name: 'Description' }).fill('Test fee 003');
-  await page.getByRole('combobox', { name: 'Status' }).selectOption('live');
+  // Fill form fields using ID selectors and trigger validation
+  await page.fill('#code', 'fee003');
+  await page.fill('#value', '300');
+  await page.fill('#description', 'Test fee 003');
+  await page.selectOption('#status', 'live');
+
+  // Wait for form to become valid and button to be enabled
+  await page.waitForFunction(() => {
+    const button = document.querySelector('button[type="submit"]') as HTMLButtonElement;
+    return button && !button.disabled;
+  });
 
   await page.getByRole('button', { name: 'Create' }).click();
 
