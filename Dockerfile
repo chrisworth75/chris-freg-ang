@@ -10,7 +10,7 @@ COPY . .
 RUN npm run build -- --configuration production
 
 FROM --platform=linux/arm64 nginx:alpine
-COPY --from=build /app/dist/chris-freg /usr/share/nginx/html
+COPY --from=build /app/dist/chris-freg/browser /usr/share/nginx/html
 
 # Custom nginx config for Angular SPA
 COPY nginx.conf /etc/nginx/nginx.conf
