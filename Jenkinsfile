@@ -112,7 +112,17 @@ pipeline {
                     // Archive test results and videos
                     junit testResults: 'test-results/results.xml', allowEmptyResults: true
                     archiveArtifacts artifacts: 'test-results/**/*', allowEmptyArchive: true
-                    archiveArtifacts artifacts: 'playwright-report/**/*', allowEmptyArchive: true
+
+                    // Publish HTML report with videos
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright Test Report',
+                        reportTitles: ''
+                    ])
                 }
                 failure {
                     echo '❌ E2E tests failed - check artifacts for details'

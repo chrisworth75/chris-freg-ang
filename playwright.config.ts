@@ -13,6 +13,7 @@ export default defineConfig({
   outputDir: 'test-results',
   reporter: process.env.CI ? [
     ['junit', { outputFile: 'test-results/results.xml' }],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['line']
   ] : [
     ['html', { outputFolder: 'playwright-report' }],
@@ -23,7 +24,7 @@ export default defineConfig({
     headless: !!process.env.CI,
     screenshot: 'only-on-failure',
     video: {
-      mode: 'retain-on-failure',
+      mode: process.env.CI ? 'retain-on-failure' : 'off',
       size: { width: 1280, height: 720 }
     },
     trace: 'retain-on-failure',
