@@ -62,4 +62,31 @@ test.describe('Smoke Tests - Basic Connectivity', () => {
       throw error;
     }
   });
+
+  test('should demonstrate video capture on failure', async ({ page }) => {
+    console.log('📹 Demonstrating video capture on test failure...');
+
+    try {
+      await page.goto('/fees');
+      await page.waitForLoadState('networkidle', { timeout: 30000 });
+
+      console.log('🎬 Performing actions that will be captured in video...');
+
+      // Click around to show some activity in the video
+      await page.click('#draft-tab');
+      await page.waitForTimeout(1000);
+      await page.click('#approved-tab');
+      await page.waitForTimeout(1000);
+      await page.click('#live-tab');
+      await page.waitForTimeout(1000);
+
+      // This will intentionally fail to trigger video capture
+      console.log('⚡ Intentionally failing to capture video...');
+      await expect(page.locator('#non-existent-element')).toBeVisible({ timeout: 5000 });
+
+    } catch (error) {
+      console.error('❌ Demo test failed as expected for video capture:', error.message);
+      throw error;
+    }
+  });
 });
