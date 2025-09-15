@@ -1,6 +1,6 @@
 
 # Dockerfile for chris-freg-ang (Angular) - ARM64 optimized
-FROM --platform=linux/arm64 node:18-alpine AS build
+FROM --platform=linux/arm64 node:18.19-alpine AS build
 
 WORKDIR /app
 COPY package*.json ./
@@ -10,7 +10,7 @@ COPY . .
 RUN npm run build -- --configuration production
 
 FROM --platform=linux/arm64 nginx:alpine
-COPY --from=build /app/dist/chris-freg/browser /usr/share/nginx/html
+COPY --from=build /app/dist/chris-freg /usr/share/nginx/html
 
 # Custom nginx config for Angular SPA
 COPY nginx.conf /etc/nginx/nginx.conf
