@@ -135,7 +135,8 @@ pipeline {
                                     jdk: '',
                                     properties: [],
                                     reportBuildPolicy: 'ALWAYS',
-                                    results: [[path: 'allure-results']]
+                                    results: [[path: 'allure-results']],
+                                    commandline: 'allure'
                                 ])
                                 echo "✅ Allure plugin configured successfully"
                                 echo "📈 Look for 'Allure Report' link in left sidebar of build page"
