@@ -129,20 +129,39 @@ pipeline {
                         def allureResultsExist = fileExists('allure-results') && sh(script: 'ls -1 allure-results | wc -l', returnStdout: true).trim() as Integer > 0
 
                         if (allureResultsExist) {
+                            // Try Allure plugin first
                             try {
                                 allure([
                                     includeProperties: false,
                                     jdk: '',
                                     properties: [],
                                     reportBuildPolicy: 'ALWAYS',
-                                    results: [[path: 'allure-results']],
-                                    commandline: 'allure'
+                                    results: [[path: 'allure-results']]
                                 ])
                                 echo "✅ Allure plugin configured successfully"
                                 echo "📈 Look for 'Allure Report' link in left sidebar of build page"
                             } catch (Exception e) {
                                 echo "❌ Allure plugin failed: ${e.message}"
-                                echo "💡 Make sure Allure plugin is properly installed and configured in Jenkins"
+                                echo "🔄 Trying fallback with publishHTML..."
+
+                                // Fallback: Generate HTML report and publish it
+                                try {
+                                    sh 'npx allure generate allure-results --clean -o allure-report-html'
+                                    publishHTML([
+                                        allowMissing: false,
+                                        alwaysLinkToLastBuild: true,
+                                        keepAll: true,
+                                        reportDir: 'allure-report-html',
+                                        reportFiles: 'index.html',
+                                        reportName: 'Allure Report (HTML)',
+                                        reportTitles: ''
+                                    ])
+                                    echo "✅ Allure report published via HTML Publisher"
+                                    echo "📈 Look for 'Allure Report (HTML)' link in left sidebar"
+                                } catch (Exception htmlError) {
+                                    echo "❌ HTML fallback also failed: ${htmlError.message}"
+                                    echo "📁 Allure results available in build artifacts for manual download"
+                                }
                             }
                         } else {
                             echo "⚠️  No allure-results found - Allure reports will not be available"
