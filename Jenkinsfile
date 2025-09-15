@@ -114,21 +114,15 @@ pipeline {
                     archiveArtifacts artifacts: 'test-results/**/*', allowEmptyArchive: true
                     archiveArtifacts artifacts: 'playwright-report/**/*', allowEmptyArchive: true
 
-                    // Note: Install HTML Publisher Plugin to enable this step
+                    // Instructions for viewing reports
                     script {
-                        try {
-                            publishHTML([
-                                allowMissing: true,
-                                alwaysLinkToLastBuild: true,
-                                keepAll: true,
-                                reportDir: 'playwright-report',
-                                reportFiles: 'index.html',
-                                reportName: 'Playwright Test Report',
-                                reportTitles: ''
-                            ])
-                        } catch (Exception e) {
-                            echo "⚠️  HTML Publisher Plugin not installed. Install it to see interactive reports."
-                            echo "📁 For now, download playwright-report.zip from build artifacts"
+                        def reportExists = fileExists('playwright-report/index.html')
+                        if (reportExists) {
+                            echo "📊 To view Playwright reports with videos:"
+                            echo "   1. Download 'playwright-report' from Build Artifacts below"
+                            echo "   2. Extract the zip file"
+                            echo "   3. Open index.html in your browser"
+                            echo "   4. Videos will play inline for failed tests"
                         }
                     }
                 }
