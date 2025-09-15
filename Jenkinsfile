@@ -125,13 +125,28 @@ pipeline {
                     archiveArtifacts artifacts: 'allure-report/**/*', allowEmptyArchive: true
 
                     // Publish Allure reports directly in Jenkins UI
-                    allure([
-                        includeProperties: false,
-                        jdk: '',
-                        properties: [],
-                        reportBuildPolicy: 'ALWAYS',
-                        results: [[path: 'allure-results']]
-                    ])
+                    script {
+                        def allureResultsExist = fileExists('allure-results') && sh(script: 'ls -1 allure-results | wc -l', returnStdout: true).trim() as Integer > 0
+
+                        if (allureResultsExist) {
+                            try {
+                                allure([
+                                    includeProperties: false,
+                                    jdk: '',
+                                    properties: [],
+                                    reportBuildPolicy: 'ALWAYS',
+                                    results: [[path: 'allure-results']]
+                                ])
+                                echo "✅ Allure plugin configured successfully"
+                                echo "📈 Look for 'Allure Report' link in left sidebar of build page"
+                            } catch (Exception e) {
+                                echo "❌ Allure plugin failed: ${e.message}"
+                                echo "💡 Make sure Allure plugin is properly installed and configured in Jenkins"
+                            }
+                        } else {
+                            echo "⚠️  No allure-results found - Allure reports will not be available"
+                        }
+                    }
 
                     // Instructions for viewing reports
                     script {
