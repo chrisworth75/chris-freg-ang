@@ -103,8 +103,15 @@ pipeline {
                         echo "🧪 Installing Playwright browsers..."
                         npx playwright install chromium
                         echo "🚀 Running E2E tests..."
-                        CI=true npx playwright test e2e/smoke-test.spec.ts e2e/fee-management.spec.ts --reporter=line
+                        # Run tests and always generate reports, even on failure
+                        set +e  # Don't exit on test failure
+                        CI=true npx playwright test e2e/smoke-test.spec.ts e2e/fee-management.spec.ts
+                        TEST_EXIT_CODE=$?
+                        set -e  # Re-enable exit on error
 
+                        echo "📊 Test execution completed with exit code: $TEST_EXIT_CODE"
+
+                        # Always try to generate additional reports
                         echo "📊 Generating Allure report..."
                         if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
                             npx allure generate allure-results --clean -o allure-report || echo "⚠️ Allure report generation failed"
@@ -112,6 +119,9 @@ pipeline {
                         else
                             echo "⚠️ No allure-results found - skipping HTML report generation"
                         fi
+
+                        # Preserve the original test exit code
+                        exit $TEST_EXIT_CODE
                     '''
                 }
             }
@@ -168,21 +178,47 @@ pipeline {
                         }
                     }
 
+                    // Publish Playwright HTML report
+                    script {
+                        def playwrightReportExists = fileExists('playwright-report/index.html')
+
+                        if (playwrightReportExists) {
+                            try {
+                                publishHTML([
+                                    allowMissing: false,
+                                    alwaysLinkToLastBuild: true,
+                                    keepAll: true,
+                                    reportDir: 'playwright-report',
+                                    reportFiles: 'index.html',
+                                    reportName: 'Playwright Report',
+                                    reportTitles: ''
+                                ])
+                                echo "✅ Playwright HTML report published"
+                                echo "🎭 Look for 'Playwright Report' link in left sidebar"
+                            } catch (Exception e) {
+                                echo "❌ Failed to publish Playwright HTML report: ${e.message}"
+                            }
+                        }
+                    }
+
                     // Instructions for viewing reports
                     script {
                         def playwrightReportExists = fileExists('playwright-report/index.html')
                         def allureResultsExist = fileExists('allure-results')
 
                         echo "📊 Available Test Reports:"
-                        echo "   📈 Allure Report: Click 'Allure Report' link on build page"
-                        echo "      - Step-by-step test execution with timeline"
-                        echo "      - Interactive charts and graphs"
-                        if (playwrightReportExists) {
-                            echo "   🎭 Playwright Report: Download 'playwright-report' → open index.html"
-                            echo "      - Videos and screenshots embedded"
+                        if (allureResultsExist) {
+                            echo "   📈 Allure Report: Click 'Allure Report' link on build page"
+                            echo "      - Step-by-step test execution with timeline"
+                            echo "      - Interactive charts and graphs"
                         }
-                        if (!allureResultsExist) {
-                            echo "   ⚠️  No allure-results generated - check test execution"
+                        if (playwrightReportExists) {
+                            echo "   🎭 Playwright Report: Click 'Playwright Report' link on build page"
+                            echo "      - Videos and screenshots embedded"
+                            echo "      - Test traces and debugging info"
+                        }
+                        if (!allureResultsExist && !playwrightReportExists) {
+                            echo "   ⚠️  No test reports generated - check test execution"
                         }
                     }
                 }

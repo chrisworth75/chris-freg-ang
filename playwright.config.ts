@@ -5,6 +5,8 @@ export default defineConfig({
   timeout: 30 * 1000,
   globalTimeout: 10 * 60 * 1000,
   globalTeardown: process.env.CI ? require.resolve('./global-teardown.js') : undefined,
+  // Force reporters to always run, even on failures
+  preserveOutput: 'always',
   expect: {
     timeout: 10 * 1000,
   },
@@ -16,7 +18,15 @@ export default defineConfig({
   reporter: process.env.CI ? [
     ['junit', { outputFile: 'test-results/results.xml' }],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
-    ['allure-playwright', { outputFolder: 'allure-results' }],
+    ['allure-playwright', {
+      outputFolder: 'allure-results',
+      suiteTitle: false,
+      detail: true,
+      environmentInfo: {
+        NODE_VERSION: process.version,
+        CI: 'Jenkins'
+      }
+    }],
     ['line']
   ] : [
     ['html', { outputFolder: 'playwright-report' }],
