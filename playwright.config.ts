@@ -3,6 +3,7 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   timeout: 30 * 1000,
+  globalTimeout: 10 * 60 * 1000,
   expect: {
     timeout: 10 * 1000,
   },
@@ -24,10 +25,14 @@ export default defineConfig({
     headless: !!process.env.CI,
     screenshot: 'only-on-failure',
     video: {
-      mode: process.env.CI ? 'retain-on-failure' : 'off',
+      mode: process.env.CI ? 'on' : 'off',
       size: { width: 1280, height: 720 }
     },
     trace: 'retain-on-failure',
+    // Ensure browser stays alive long enough to finalize video
+    launchOptions: {
+      slowMo: process.env.CI ? 100 : 0,
+    }
   },
   projects: [
     {
