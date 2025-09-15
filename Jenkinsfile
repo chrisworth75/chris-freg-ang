@@ -124,24 +124,30 @@ pipeline {
                     archiveArtifacts artifacts: 'allure-results/**/*', allowEmptyArchive: true
                     archiveArtifacts artifacts: 'allure-report/**/*', allowEmptyArchive: true
 
+                    // Publish Allure reports directly in Jenkins UI
+                    allure([
+                        includeProperties: false,
+                        jdk: '',
+                        properties: [],
+                        reportBuildPolicy: 'ALWAYS',
+                        results: [[path: 'allure-results']]
+                    ])
+
                     // Instructions for viewing reports
                     script {
                         def playwrightReportExists = fileExists('playwright-report/index.html')
-                        def allureReportExists = fileExists('allure-report/index.html')
+                        def allureResultsExist = fileExists('allure-results')
 
                         echo "📊 Available Test Reports:"
+                        echo "   📈 Allure Report: Click 'Allure Report' link on build page"
+                        echo "      - Step-by-step test execution with timeline"
+                        echo "      - Interactive charts and graphs"
                         if (playwrightReportExists) {
                             echo "   🎭 Playwright Report: Download 'playwright-report' → open index.html"
                             echo "      - Videos and screenshots embedded"
                         }
-                        if (allureReportExists) {
-                            echo "   📈 Allure Report: Download 'allure-report' → open index.html"
-                            echo "      - Step-by-step test execution details"
-                            echo "      - Timeline and history"
-                        }
-                        if (!allureReportExists) {
-                            echo "   ⚠️  Install Allure CLI for detailed step reports:"
-                            echo "      brew install allure (macOS) or npm install -g allure-commandline"
+                        if (!allureResultsExist) {
+                            echo "   ⚠️  No allure-results generated - check test execution"
                         }
                     }
                 }
