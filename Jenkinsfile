@@ -106,7 +106,12 @@ pipeline {
                         CI=true npx playwright test e2e/smoke-test.spec.ts e2e/fee-management.spec.ts --reporter=line
 
                         echo "📊 Generating Allure report..."
-                        npx allure generate allure-results --clean -o allure-report || echo "⚠️ Install Allure CLI for step-by-step reports"
+                        if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
+                            npx allure generate allure-results --clean -o allure-report || echo "⚠️ Allure report generation failed"
+                            echo "✅ Allure report generated successfully"
+                        else
+                            echo "⚠️ No allure-results found - skipping HTML report generation"
+                        fi
                     '''
                 }
             }
