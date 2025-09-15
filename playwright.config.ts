@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: './e2e',
   timeout: 30 * 1000,
   globalTimeout: 10 * 60 * 1000,
+  globalTeardown: process.env.CI ? require.resolve('./global-teardown.js') : undefined,
   expect: {
     timeout: 10 * 1000,
   },
@@ -25,7 +26,7 @@ export default defineConfig({
     headless: !!process.env.CI,
     screenshot: 'only-on-failure',
     video: {
-      mode: process.env.CI ? 'on' : 'off',
+      mode: process.env.CI ? 'retain-on-failure' : 'off',
       size: { width: 1280, height: 720 }
     },
     trace: 'retain-on-failure',
