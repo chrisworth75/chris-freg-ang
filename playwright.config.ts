@@ -16,9 +16,11 @@ export default defineConfig({
   reporter: process.env.CI ? [
     ['junit', { outputFile: 'test-results/results.xml' }],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['allure-playwright', { outputFolder: 'allure-results' }],
     ['line']
   ] : [
     ['html', { outputFolder: 'playwright-report' }],
+    ['allure-playwright', { outputFolder: 'allure-results' }],
     ['list']
   ],
   use: {

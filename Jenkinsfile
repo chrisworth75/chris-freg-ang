@@ -104,6 +104,9 @@ pipeline {
                         npx playwright install chromium
                         echo "🚀 Running E2E tests..."
                         CI=true npx playwright test e2e/smoke-test.spec.ts e2e/fee-management.spec.ts --reporter=line
+
+                        echo "📊 Generating Allure report..."
+                        npx allure generate allure-results --clean -o allure-report || echo "⚠️ Install Allure CLI for step-by-step reports"
                     '''
                 }
             }
@@ -113,16 +116,27 @@ pipeline {
                     junit testResults: 'test-results/results.xml', allowEmptyResults: true
                     archiveArtifacts artifacts: 'test-results/**/*', allowEmptyArchive: true
                     archiveArtifacts artifacts: 'playwright-report/**/*', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'allure-results/**/*', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'allure-report/**/*', allowEmptyArchive: true
 
                     // Instructions for viewing reports
                     script {
-                        def reportExists = fileExists('playwright-report/index.html')
-                        if (reportExists) {
-                            echo "📊 To view Playwright reports with videos:"
-                            echo "   1. Download 'playwright-report' from Build Artifacts below"
-                            echo "   2. Extract the zip file"
-                            echo "   3. Open index.html in your browser"
-                            echo "   4. Videos will play inline for failed tests"
+                        def playwrightReportExists = fileExists('playwright-report/index.html')
+                        def allureReportExists = fileExists('allure-report/index.html')
+
+                        echo "📊 Available Test Reports:"
+                        if (playwrightReportExists) {
+                            echo "   🎭 Playwright Report: Download 'playwright-report' → open index.html"
+                            echo "      - Videos and screenshots embedded"
+                        }
+                        if (allureReportExists) {
+                            echo "   📈 Allure Report: Download 'allure-report' → open index.html"
+                            echo "      - Step-by-step test execution details"
+                            echo "      - Timeline and history"
+                        }
+                        if (!allureReportExists) {
+                            echo "   ⚠️  Install Allure CLI for detailed step reports:"
+                            echo "      brew install allure (macOS) or npm install -g allure-commandline"
                         }
                     }
                 }
