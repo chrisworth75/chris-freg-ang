@@ -110,7 +110,10 @@ pipeline {
             post {
                 always {
                     // Archive test results and videos
-                    publishTestResults testResultsPattern: 'test-results/results.xml'
+                    publishTestResults([
+                        testResultsPattern: 'test-results/results.xml',
+                        allowEmptyResults: true
+                    ])
                     archiveArtifacts artifacts: 'test-results/**/*', allowEmptyArchive: true
                     archiveArtifacts artifacts: 'playwright-report/**/*', allowEmptyArchive: true
                 }
