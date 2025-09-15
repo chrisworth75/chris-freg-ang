@@ -126,7 +126,7 @@ pipeline {
 
                     // Publish Allure reports directly in Jenkins UI
                     script {
-                        def allureResultsExist = fileExists('allure-results') && sh(script: 'ls -1 allure-results | wc -l', returnStdout: true).trim() as Integer > 0
+                        def allureResultsExist = fileExists('allure-results') && (sh(script: 'ls -1 allure-results | wc -l', returnStdout: true).trim() as Integer) > 0
 
                         if (allureResultsExist) {
                             // Try Allure plugin first
