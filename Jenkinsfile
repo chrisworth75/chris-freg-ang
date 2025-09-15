@@ -72,7 +72,7 @@ pipeline {
                     // Wait for services to be ready
                     sh '''
                         echo "🔄 Waiting for services to be ready..."
-                        timeout=60
+                        timeout=120
                         while [ $timeout -gt 0 ]; do
                             frontend_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4200 || echo "000")
                             api_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5100/health || echo "000")
