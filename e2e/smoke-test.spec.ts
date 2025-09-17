@@ -64,48 +64,45 @@ test.describe('Smoke Tests - Basic Connectivity', () => {
     }
   });
 
-  test('should demonstrate video capture on failure', async ({ page }) => {
-    await allure.step('📹 Starting video capture demo test', async () => {
-      console.log('📹 Demonstrating video capture on test failure...');
+  test('should demonstrate successful user interactions with video capture', async ({ page }) => {
+    await allure.step('📹 Starting successful video capture demo test', async () => {
+      console.log('📹 Demonstrating successful video capture...');
     });
 
-    try {
-      await allure.step('🌐 Navigate to fees page', async () => {
-        await page.goto('/fees');
-        await page.waitForLoadState('networkidle', { timeout: 30000 });
-        console.log('✅ Successfully navigated to /fees');
+    await allure.step('🌐 Navigate to fees page', async () => {
+      await page.goto('/fees');
+      await page.waitForLoadState('networkidle', { timeout: 30000 });
+      console.log('✅ Successfully navigated to /fees');
+    });
+
+    await allure.step('🎬 Perform user interactions for video demo', async () => {
+      console.log('🎬 Performing actions that will be captured in video...');
+
+      await allure.step('Click Draft tab', async () => {
+        await page.click('#draft-tab');
+        await page.waitForTimeout(1000);
+        console.log('✅ Clicked Draft tab');
       });
 
-      await allure.step('🎬 Perform user interactions for video demo', async () => {
-        console.log('🎬 Performing actions that will be captured in video...');
-
-        await allure.step('Click Draft tab', async () => {
-          await page.click('#draft-tab');
-          await page.waitForTimeout(1000);
-          console.log('✅ Clicked Draft tab');
-        });
-
-        await allure.step('Click Approved tab', async () => {
-          await page.click('#approved-tab');
-          await page.waitForTimeout(1000);
-          console.log('✅ Clicked Approved tab');
-        });
-
-        await allure.step('Click Live tab', async () => {
-          await page.click('#live-tab');
-          await page.waitForTimeout(1000);
-          console.log('✅ Clicked Live tab');
-        });
+      await allure.step('Click Approved tab', async () => {
+        await page.click('#approved-tab');
+        await page.waitForTimeout(1000);
+        console.log('✅ Clicked Approved tab');
       });
 
-      await allure.step('⚡ Intentionally trigger test failure', async () => {
-        console.log('⚡ Intentionally failing to capture video...');
-        await expect(page.locator('#non-existent-element')).toBeVisible({ timeout: 5000 });
+      await allure.step('Click Live tab', async () => {
+        await page.click('#live-tab');
+        await page.waitForTimeout(1000);
+        console.log('✅ Clicked Live tab');
       });
+    });
 
-    } catch (error) {
-      console.error('❌ Demo test failed as expected for video capture:', error.message);
-      throw error;
-    }
+    await allure.step('✅ Verify page elements exist', async () => {
+      console.log('✅ Verifying all tabs are visible and functional...');
+      await expect(page.locator('#draft-tab')).toBeVisible();
+      await expect(page.locator('#approved-tab')).toBeVisible();
+      await expect(page.locator('#live-tab')).toBeVisible();
+      console.log('✅ All tabs verified successfully');
+    });
   });
 });

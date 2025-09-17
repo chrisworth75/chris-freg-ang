@@ -1,0 +1,9 @@
+❌ Demo test failed as expected for video capture: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+Locator: locator('#non-existent-element')
+Expected: visible
+Received: <element(s) not found>
+Call log:
+  - Expect "toBeVisible" with timeout 5000ms
+  - waiting for locator('#non-existent-element')
+
