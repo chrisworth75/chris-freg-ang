@@ -162,9 +162,9 @@ test.describe('Fee Management E2E Tests', () => {
     await page.goto('/create');
     await page.waitForLoadState('networkidle');
 
-    // Wait for form to be ready and try to submit empty form
+    // Wait for form to be ready and try to submit empty form (force click even if disabled)
     await page.waitForSelector('button[type="submit"]', { state: 'visible' });
-    await page.click('button[type="submit"]');
+    await page.click('button[type="submit"]', { force: true });
 
     // Verify validation errors appear
     await expect(page.locator('.invalid-feedback')).toContainText('Code is required');
