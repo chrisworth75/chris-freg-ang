@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Video Capture Test', () => {
 
-  test.skip('intentional failure to test video capture', async ({ page }) => {
-    // This test is skipped by default but can be enabled to test video capture
+  test('intentional failure to test video capture', async ({ page }) => {
+    // This test demonstrates video capture on success
     await page.goto('/fees');
     await page.waitForLoadState('networkidle');
 
@@ -15,8 +15,9 @@ test.describe('Video Capture Test', () => {
     await page.click('#live-tab');
     await page.waitForTimeout(1000);
 
-    // This will intentionally fail to trigger video capture
-    await expect(page.locator('body')).toContainText('This text does not exist');
+    // Verify page elements exist (this should pass)
+    await expect(page.locator('body')).toBeVisible();
+    await expect(page.locator('#draft-tab')).toBeVisible();
   });
 
   test('video capture verification - navigation test', async ({ page }) => {
