@@ -160,8 +160,10 @@ test.describe('Fee Management E2E Tests', () => {
 
   test('should handle form validation errors correctly', async ({ page }) => {
     await page.goto('/create');
+    await page.waitForLoadState('networkidle');
 
-    // Try to submit empty form
+    // Wait for form to be ready and try to submit empty form
+    await page.waitForSelector('button[type="submit"]', { state: 'visible' });
     await page.click('button[type="submit"]');
 
     // Verify validation errors appear
