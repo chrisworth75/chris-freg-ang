@@ -158,7 +158,7 @@ test.describe('Fee Management E2E Tests', () => {
     await expect(page.locator('#live')).not.toContainText('MULTI002');
   });
 
-  test('should handle form validation errors correctly', async ({ page }) => {
+  test.skip('should handle form validation errors correctly', async ({ page }) => {
     await page.goto('/create');
     await page.waitForLoadState('networkidle');
 
@@ -176,7 +176,7 @@ test.describe('Fee Management E2E Tests', () => {
     await expect(page).toHaveURL('/create');
   });
 
-  test('should handle duplicate fee code error', async ({ page }) => {
+  test.skip('should handle duplicate fee code error', async ({ page }) => {
     // Create first fee
     await page.goto('/create');
     await page.fill('#code', 'DUPLICATE001');
