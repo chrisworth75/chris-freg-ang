@@ -167,10 +167,10 @@ test.describe('Fee Management E2E Tests', () => {
     await page.click('button[type="submit"]', { force: true });
 
     // Verify validation errors appear
-    await expect(page.locator('.invalid-feedback')).toContainText('Code is required');
-    await expect(page.locator('.invalid-feedback')).toContainText('Amount is required');
-    await expect(page.locator('.invalid-feedback')).toContainText('Description is required');
-    await expect(page.locator('.invalid-feedback')).toContainText('Status is required');
+    await expect(page.locator('#code + .invalid-feedback')).toContainText('Code is required');
+    await expect(page.locator('#value + .invalid-feedback')).toContainText('Amount is required');
+    await expect(page.locator('#description + .invalid-feedback')).toContainText('Description is required');
+    await expect(page.locator('#status + .invalid-feedback')).toContainText('Status is required');
 
     // Verify form is still on create page (not submitted)
     await expect(page).toHaveURL('/create');
