@@ -69,6 +69,9 @@ test.describe('Fee Management E2E Tests', () => {
     // Click on Approved tab
     await page.click('#approved-tab');
 
+    // Wait for the tab content to load
+    await page.waitForLoadState('networkidle');
+
     // Verify we're on the Approved tab
     await expect(page.locator('#approved-tab')).toHaveClass(/active/);
 
@@ -203,24 +206,24 @@ test.describe('Fee Management E2E Tests', () => {
 
     // Verify default tab is Draft
     await expect(page.locator('#draft-tab')).toHaveClass(/active/);
-    await expect(page.locator('#draft')).toHaveClass(/show active/);
+    await expect(page.locator('#draft')).toHaveClass(/show.*active|active.*show/);
 
     // Switch to Approved tab
     await page.click('#approved-tab');
     await expect(page.locator('#approved-tab')).toHaveClass(/active/);
-    await expect(page.locator('#approved')).toHaveClass(/show active/);
+    await expect(page.locator('#approved')).toHaveClass(/show.*active|active.*show/);
     await expect(page.locator('#draft')).not.toHaveClass(/active/);
 
     // Switch to Live tab
     await page.click('#live-tab');
     await expect(page.locator('#live-tab')).toHaveClass(/active/);
-    await expect(page.locator('#live')).toHaveClass(/show active/);
+    await expect(page.locator('#live')).toHaveClass(/show.*active|active.*show/);
     await expect(page.locator('#approved')).not.toHaveClass(/active/);
 
     // Switch back to Draft tab
     await page.click('#draft-tab');
     await expect(page.locator('#draft-tab')).toHaveClass(/active/);
-    await expect(page.locator('#draft')).toHaveClass(/show active/);
+    await expect(page.locator('#draft')).toHaveClass(/show.*active|active.*show/);
     await expect(page.locator('#live')).not.toHaveClass(/active/);
   });
 });
