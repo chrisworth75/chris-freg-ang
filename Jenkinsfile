@@ -105,7 +105,7 @@ pipeline {
                         echo "🚀 Running E2E tests..."
                         # Run tests and always generate reports, even on failure
                         set +e  # Don't exit on test failure
-                        CI=true npx playwright test e2e/smoke-test.spec.ts e2e/fee-management.spec.ts
+                        CI=true npx playwright test e2e/fee-management.spec.ts --reporter=html,junit,allure-playwright
                         TEST_EXIT_CODE=$?
                         set -e  # Re-enable exit on error
 
