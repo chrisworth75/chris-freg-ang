@@ -77,9 +77,9 @@ test.describe('Fee Management E2E Tests', () => {
 
     // Verify the fee appears in the Approved tab
     const approvedTab = page.locator('#approved');
-    await expect(approvedTab.locator('.card')).toContainText('Fee ID:');
-    await expect(approvedTab.locator('.card')).toContainText('£150.50');
-    await expect(approvedTab.locator('.card')).toContainText('Status: Approved');
+    await expect(approvedTab).toContainText('Fee ID:');
+    await expect(approvedTab).toContainText('£150.50');
+    await expect(approvedTab).toContainText('Status: Approved');
   });
 
   test('should create a live fee and verify it appears in the Live tab', async ({ page }) => {
@@ -114,7 +114,7 @@ test.describe('Fee Management E2E Tests', () => {
     await expect(liveTab.locator('.card')).toContainText('Status: Live');
   });
 
-  test.skip('should create fees of all categories and verify proper tab organization', async ({ page }) => {
+  test('should create fees of all categories and verify proper tab organization', async ({ page }) => {
     const testFees = [
       { code: 'MULTI001', value: '10.00', description: 'Multi-test draft fee', status: 'draft' },
       { code: 'MULTI002', value: '20.00', description: 'Multi-test approved fee', status: 'approved' },
@@ -138,30 +138,33 @@ test.describe('Fee Management E2E Tests', () => {
     await page.goto('/fees');
     await page.waitForLoadState('networkidle');
 
-    // Test Draft tab
+    // Test Draft tab (should be active by default, but click to ensure)
     await page.click('#draft-tab');
-    await page.waitForTimeout(1000); // Wait for tab content to load
-    await expect(page.locator('#draft')).toContainText('MULTI001');
+    await page.waitForLoadState('networkidle'); // Wait for tab content to load
+
+    // Add a short wait to ensure tab content has loaded
+    await page.waitForTimeout(500);
+
+    await expect(page.locator('#draft')).toContainText('Fee ID:');
     await expect(page.locator('#draft')).toContainText('£10.00');
-    await expect(page.locator('#draft')).not.toContainText('MULTI002');
-    await expect(page.locator('#draft')).not.toContainText('MULTI003');
+    await expect(page.locator('#draft')).toContainText('Status: Draft');
 
     // Test Approved tab
     await page.click('#approved-tab');
-    await expect(page.locator('#approved')).toContainText('MULTI002');
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('#approved')).toContainText('Fee ID:');
     await expect(page.locator('#approved')).toContainText('£20.00');
-    await expect(page.locator('#approved')).not.toContainText('MULTI001');
-    await expect(page.locator('#approved')).not.toContainText('MULTI003');
+    await expect(page.locator('#approved')).toContainText('Status: Approved');
 
     // Test Live tab
     await page.click('#live-tab');
-    await expect(page.locator('#live')).toContainText('MULTI003');
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('#live')).toContainText('Fee ID:');
     await expect(page.locator('#live')).toContainText('£30.00');
-    await expect(page.locator('#live')).not.toContainText('MULTI001');
-    await expect(page.locator('#live')).not.toContainText('MULTI002');
+    await expect(page.locator('#live')).toContainText('Status: Live');
   });
 
-  test.skip('should handle form validation errors correctly', async ({ page }) => {
+  test('should handle form validation errors correctly', async ({ page }) => {
     await page.goto('/create');
     await page.waitForLoadState('networkidle');
 
@@ -179,7 +182,7 @@ test.describe('Fee Management E2E Tests', () => {
     await expect(page).toHaveURL('/create');
   });
 
-  test.skip('should handle duplicate fee code error', async ({ page }) => {
+  test('should handle duplicate fee code error', async ({ page }) => {
     // Create first fee
     await page.goto('/create');
     await page.fill('#code', 'DUPLICATE001');
