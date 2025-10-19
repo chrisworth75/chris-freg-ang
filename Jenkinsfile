@@ -36,7 +36,7 @@ pipeline {
                     // Kill any process using port 4200
                     sh """
                         echo "Killing any process using port 4200..."
-                        lsof -ti:4200 | xargs kill -9 || true
+                        /usr/sbin/lsof -ti:4200 | xargs kill -9 || true
                     """
 
                     // Stop existing container if running
