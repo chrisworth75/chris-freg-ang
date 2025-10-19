@@ -1,0 +1,2 @@
+Database reset response: 200
+Draft tab content: Fee ID: 1Value: £10.00Status: Draft

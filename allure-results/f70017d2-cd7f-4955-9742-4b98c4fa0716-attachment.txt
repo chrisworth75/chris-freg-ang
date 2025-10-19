@@ -1,0 +1,20 @@
+🔗 Testing API connectivity through Angular proxy...
+📊 API response status: 200
+📦 API response: [
+  {
+    id: 1,
+    code: 'DUPLICATE001',
+    value: '50.00',
+    description: 'First fee',
+    status: 'draft',
+    start_date: '2025-09-18T12:00:00.000Z',
+    end_date: '2026-09-18T12:00:00.000Z',
+    type: 'fixed',
+    service: 'jason',
+    jurisdiction1: 'bonnie',
+    jurisdiction2: 'tom',
+    created_at: '2025-09-18T20:00:09.388Z',
+    updated_at: '2025-09-18T20:00:09.388Z'
+  }
+]
+✅ API is accessible through proxy
