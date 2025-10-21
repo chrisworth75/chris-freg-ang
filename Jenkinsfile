@@ -33,12 +33,6 @@ pipeline {
             }
             steps {
                 script {
-                    // Kill any process using port 4200
-                    sh """
-                        echo "Killing any process using port 4200..."
-                        /usr/sbin/lsof -ti:4200 | xargs kill -9 || true
-                    """
-
                     // Stop existing container if running
                     sh """
                         docker stop ${IMAGE_NAME} || true
